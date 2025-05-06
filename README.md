@@ -87,7 +87,7 @@ git submodule update --init
 ```
 当然你可以用其他三方库，但是如果使用了不同版本，你需要自己解决三方库的问题。
 
-- [CUDD文档](http://web.mit.edu/sage/export/tmp/y/usr/share/doc/polybori/cudd/node3.html)，[CUDD接口函数](http://web.mit.edu/sage/export/tmp/y/usr/share/doc/polybori/cudd/cuddExtDet.html)
+- [CUDD设计文档](http://web.mit.edu/sage/export/tmp/y/usr/share/doc/polybori/cudd/node4.html), [CUDD使用文档](http://web.mit.edu/sage/export/tmp/y/usr/share/doc/polybori/cudd/node3.html)，[CUDD接口函数](http://web.mit.edu/sage/export/tmp/y/usr/share/doc/polybori/cudd/cuddExtDet.html)
 - [Yosys文档](https://yosyshq.readthedocs.io/projects/yosys/en/latest/index.html)，下面几个命令会比较有用
   - `read_verilog` 读入verilog文件
   - `synth` 综合verilog文件
