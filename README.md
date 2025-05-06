@@ -78,15 +78,16 @@
 - 电路中需要使用AND将所有约束的结果合并为一个输出，约束的合并顺序会影响BDD的中间结果，对运行时间有较大影响。
 - 有些变量可能相互没有任何关系，不相关的变量可以分开求解。
   
-## 三方库说明
+## 第三方库说明
 这个大作业中需要用到很多第三方库，**配置和编译第三方库会比较耗费时间，请提前配好环境**。
 
-由于三方库不同版本可能存在bug，请从这个repo的submodule中下载，运行
+由于第三方库不同版本可能存在bug，请从这个repo的submodule中下载，运行
 ```bash
 git submodule update --init
 ```
-当然你可以用其他三方库，但是如果使用了不同版本，你需要自己解决三方库的问题。
+当然你可以用其他第三方库，但是如果使用了不同版本，你需要自己解决第三方库的问题。
 
+第三方库文档：
 - [CUDD设计文档](http://web.mit.edu/sage/export/tmp/y/usr/share/doc/polybori/cudd/node4.html), [CUDD使用文档](http://web.mit.edu/sage/export/tmp/y/usr/share/doc/polybori/cudd/node3.html)，[CUDD接口函数](http://web.mit.edu/sage/export/tmp/y/usr/share/doc/polybori/cudd/cuddExtDet.html)
 - [Yosys文档](https://yosyshq.readthedocs.io/projects/yosys/en/latest/index.html)，下面几个命令会比较有用
   - `read_verilog` 读入verilog文件
