@@ -68,9 +68,9 @@
 在评测时，会执行一次 `./build.sh`，用于编译你的代码。
 `run.sh` 用于执行你的程序，应当实现如下调用方式：
 ```bash
-./run.sh [constraint.json] [num_samples] [result.json] [random_seed]
+./run.sh [constraint.json] [num_samples] [run_dir] [random_seed]
 ```
-你的程序需要读入constraint.json，根据random_seed设置随机种子，生成num_samples个随机解到result.json中。程序执行过程中只能使用一个线程。
+你的程序需要读入constraint.json，根据random_seed设置随机种子，生成num_samples个随机解到 `run_dir/result.json` 中。程序执行过程中只能使用一个线程，运行的中间文件统一输出到 `run_dir` 中，避免对不同测试点同时测试时文件互相覆盖。
 
 ## 评分
 评测数据包含多个部分，每个部分的总分和要求如下
@@ -84,7 +84,7 @@
 |opt4|4|运行10次，每次都能在120s内完成|
 |opt5|12|运行10次，每次都能在30s内完成|
 
-每个部分包含多个测试点，通过一个测试点即可拿到对应比例的分数（$n$个测试点通过了$k$个即可拿到分数的 $\frac{k}{n}$）。
+每个部分包含多个测试点，通过一个测试点即可拿到对应比例的分数（ $n$ 个测试点通过了 $k$ 个即可拿到分数的 $\frac{k}{n}$）。
 
 ## 性能优化Hint
 - 根据电路结构求得一个变量初始顺序，调用 `Cudd_ShuffleHeap` 设置手动变量顺序
