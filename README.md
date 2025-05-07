@@ -43,6 +43,8 @@
 }
 ```
 
+每个测试用例还有一个txt文件，帮助直观地查看约束表达式。可以先看一下 [basic/0.json](https://github.com/pku-liang/sv-sampler-lab/blob/main/basic/0.json) 和 [basic/0.txt](https://github.com/pku-liang/sv-sampler-lab/blob/main/basic/0.txt) 帮助理解。
+
 ## 输出格式
 你需要输出一个JSON文件，格式如下
 ```hjson
