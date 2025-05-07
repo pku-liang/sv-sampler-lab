@@ -1,0 +1,280 @@
+{
+    "variable_list": [
+        {
+            "id": 0,
+            "name": "var_0",
+            "signed": false,
+            "bit_width": 36
+        },
+        {
+            "id": 1,
+            "name": "var_1",
+            "signed": false,
+            "bit_width": 51
+        },
+        {
+            "id": 2,
+            "name": "var_2",
+            "signed": false,
+            "bit_width": 57
+        },
+        {
+            "id": 3,
+            "name": "var_3",
+            "signed": false,
+            "bit_width": 54
+        },
+        {
+            "id": 4,
+            "name": "var_4",
+            "signed": false,
+            "bit_width": 60
+        },
+        {
+            "id": 5,
+            "name": "var_5",
+            "signed": false,
+            "bit_width": 49
+        },
+        {
+            "id": 6,
+            "name": "var_6",
+            "signed": false,
+            "bit_width": 39
+        },
+        {
+            "id": 7,
+            "name": "var_7",
+            "signed": false,
+            "bit_width": 57
+        },
+        {
+            "id": 8,
+            "name": "var_8",
+            "signed": false,
+            "bit_width": 57
+        },
+        {
+            "id": 9,
+            "name": "var_9",
+            "signed": false,
+            "bit_width": 46
+        }
+    ],
+    "constraint_list": [
+        {
+            "op": "LOG_NEG",
+            "lhs_expression": {
+                "op": "LOG_NEG",
+                "lhs_expression": {
+                    "op": "BIT_AND",
+                    "lhs_expression": {
+                        "op": "VAR",
+                        "id": 7
+                    },
+                    "rhs_expression": {
+                        "op": "VAR",
+                        "id": 3
+                    }
+                }
+            }
+        },
+        {
+            "op": "NEQ",
+            "lhs_expression": {
+                "op": "LOG_AND",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 0
+                },
+                "rhs_expression": {
+                    "op": "VAR",
+                    "id": 7
+                }
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 9
+            }
+        },
+        {
+            "op": "LOG_NEG",
+            "lhs_expression": {
+                "op": "BIT_NEG",
+                "lhs_expression": {
+                    "op": "BIT_XOR",
+                    "lhs_expression": {
+                        "op": "VAR",
+                        "id": 0
+                    },
+                    "rhs_expression": {
+                        "op": "CONST",
+                        "value": "36'he755720a5"
+                    }
+                }
+            }
+        },
+        {
+            "op": "LSHIFT",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 9
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "46'h11"
+            }
+        },
+        {
+            "op": "BIT_XOR",
+            "lhs_expression": {
+                "op": "RSHIFT",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 7
+                },
+                "rhs_expression": {
+                    "op": "CONST",
+                    "value": "57'h1f"
+                }
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "57'hb899e50540b2ef"
+            }
+        },
+        {
+            "op": "IMPLY",
+            "lhs_expression": {
+                "op": "BIT_NEG",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 0
+                }
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 0
+            }
+        },
+        {
+            "op": "IMPLY",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 2
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 5
+            }
+        },
+        {
+            "op": "LOG_OR",
+            "lhs_expression": {
+                "op": "BIT_NEG",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 8
+                }
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 5
+            }
+        },
+        {
+            "op": "RSHIFT",
+            "lhs_expression": {
+                "op": "IMPLY",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 7
+                },
+                "rhs_expression": {
+                    "op": "CONST",
+                    "value": "57'h25d36a26c0e034"
+                }
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "1'h0"
+            }
+        },
+        {
+            "op": "NEQ",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 6
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "64'h276a2911cf"
+            }
+        },
+        {
+            "op": "BIT_XOR",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 8
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 2
+            }
+        },
+        {
+            "op": "BIT_AND",
+            "lhs_expression": {
+                "op": "LSHIFT",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 7
+                },
+                "rhs_expression": {
+                    "op": "CONST",
+                    "value": "57'h32"
+                }
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 8
+            }
+        },
+        {
+            "op": "RSHIFT",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 4
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "60'h39"
+            }
+        },
+        {
+            "op": "IMPLY",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 5
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "49'hd1d336499cea"
+            }
+        },
+        {
+            "op": "BIT_XOR",
+            "lhs_expression": {
+                "op": "BIT_NEG",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 2
+                }
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 2
+            }
+        }
+    ]
+}

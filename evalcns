@@ -1,0 +1,545 @@
+#!/usr/bin/env python3
+import json
+
+from enum import Enum
+from optparse import OptionParser
+
+variable_list = []
+constraint_list = []
+assignment_list = {}
+
+class OperType(Enum):
+    UNDEF = 0
+
+    Unary = 1
+    Binary = 2
+    Ternary = 3
+
+    Var = 4
+    Const = 5
+
+class OperId(Enum):
+    UNDEF = 0
+
+    BOOLNEGATE = 1
+    BOOLAND = 2
+    BOOLOR = 3
+    IMPLY = 4
+
+    BITNEGATE = 5
+    BITAND = 6
+    BITOR = 7
+    BITXOR = 8
+
+    ADD = 9
+    SUB = 10
+    MUL = 11 
+    DIV = 12
+    MOD = 13
+
+    EQ = 14
+    NEQ = 15
+    LT = 16
+    LE = 17
+    GT = 18
+    GE = 19
+
+    LSHIFT = 20
+    RSHIFT = 21
+
+    VAR = 30
+    CONST = 31
+
+    ITE = 32
+    MINUS = 33
+
+class Variable:
+    def __init__(self, id, n, s, w):
+       self._id = id 
+       self._name = n
+       self._signed = s
+       self._width = w
+       self._val = 0
+   
+    def print_def(self):
+        if self._signed:
+            print("bit signed [%d : %d] %s" % (self._width - 1, 0, self._name))
+        else:
+            print("bit [%d : %d] %s" % (self._width - 1, 0, self._name))
+
+    def print_assign(self):
+        if self._signed:
+            print("%s = %ds'h%x" % (self._name,self._width, self._val))
+        else:
+            print("%s = %d'h%x" % (self._name,self._width, self._val))
+
+class Expression:
+
+    def __init__(self, id, lhs, rhs, pred, var, const):
+        self._id = id
+        self._lhs_expression = lhs
+        self._rhs_expression = rhs
+        self._pred_expression = pred
+        self._var = var
+        self._width = 0
+        if const is None:
+            self._val = 0
+        else:
+            val_arr = const.split("'h", 1)
+            self._width = int(val_arr[0], 10)
+            self._val = int(val_arr[1], 16)
+
+    def to_str(self):
+        if OperIdTypeMap[self._id] == OperType.Binary:
+            str = "(" + self._lhs_expression.to_str()
+            str += " " + OperIdStrMap[self._id] + " "
+            str += self._rhs_expression.to_str() + ")"
+        if OperIdTypeMap[self._id] == OperType.Unary:
+            str = "(" + OperIdStrMap[self._id] + self._lhs_expression.to_str() + ")"
+        if OperIdTypeMap[self._id] == OperType.Ternary:
+            str = "(" + self._pred_expression.to_str()
+            str += " ? " + self._lhs_expression.to_str()
+            str += " : " + self._rhs_expression.to_str()
+            str += ")"
+        if OperIdTypeMap[self._id] == OperType.Var:
+            '''str = "v_%d" % self._var'''
+            str = "%s" % (variable_list[self._var]._name)
+        if OperIdTypeMap[self._id] == OperType.Const:
+            str = "%x" % self._val
+        return str
+
+    def to_type_str(self):
+        if OperIdTypeMap[self._id] == OperType.Binary:
+            str = "%d'" % (self._width)
+            str += "(" + self._lhs_expression.to_type_str()
+            str += " " + OperIdStrMap[self._id] + " "
+            str += self._rhs_expression.to_type_str() + ")"
+        if OperIdTypeMap[self._id] == OperType.Unary:
+            str = "%d'" % (self._width)
+            str += "(" + OperIdStrMap[self._id] + self._lhs_expression.to_type_str() + ")"
+        if OperIdTypeMap[self._id] == OperType.Ternary:
+            str = "%d'" % (self._width)
+            str += "(" + self._pred_expression.to_type_str()
+            str += " ? " + self._lhs_expression.to_type_str()
+            str += " : " + self._rhs_expression.to_type_str()
+            str += ")"
+        if OperIdTypeMap[self._id] == OperType.Var:
+            '''str = "v_%d" % self._var'''
+            str = "%d'(%s)" % (self._width, variable_list[self._var]._name)
+        if OperIdTypeMap[self._id] == OperType.Const:
+            str = "%d'(%x)" % (self._width, self._val)
+        return str
+
+    def annotate_width_1(self):
+        if OperIdTypeMap[self._id] == OperType.Binary:
+            if (self._id == OperId.ADD or
+                self._id == OperId.SUB or
+                self._id == OperId.MUL or
+                self._id == OperId.DIV or
+                self._id == OperId.MOD or
+                self._id == OperId.BITAND or
+                self._id == OperId.BITOR or
+                self._id == OperId.BITXOR):
+                self._lhs_expression.annotate_width_1()
+                self._rhs_expression.annotate_width_1()
+                if (self._lhs_expression._width >= self._rhs_expression._width):
+                    self._width = self._lhs_expression._width
+                else:
+                    self._width = self._rhs_expression._width
+            elif (self._id == OperId.EQ or
+                  self._id == OperId.NEQ or
+                  self._id == OperId.LT or
+                  self._id == OperId.LE or
+                  self._id == OperId.GT or
+                  self._id == OperId.GE or
+                  self._id == OperId.BOOLAND or
+                  self._id == OperId.BOOLOR or
+                  self._id == OperId.IMPLY):
+                self._lhs_expression.annotate_width_1()
+                self._rhs_expression.annotate_width_1()
+                self._width = 1
+            elif (self._id == OperId.LSHIFT or
+                  self._id == OperId.RSHIFT):
+                self._lhs_expression.annotate_width_1()
+                self._rhs_expression.annotate_width_1()
+                self._width = self._lhs_expression._width
+        elif OperIdTypeMap[self._id] == OperType.Unary:
+            self._lhs_expression.annotate_width_1()
+            if (self._id == OperId.BOOLNEGATE):
+                self._width = 1
+            elif (self._id == OperId.BITNEGATE):
+                self._width = self._lhs_expression._width
+            elif (self._id == OperId.MINUS):
+                self._width = self._lhs_expression._width
+            else:
+                print("The OP is not yet supported")
+        elif OperIdTypeMap[self._id] == OperType.Var:
+            self._width = variable_list[self._var]._width
+        elif OperIdTypeMap[self._id] == OperType.Const:
+            val = self._val
+            '''self._width = 0
+            while(val):
+                self._width += 1
+                val = val >> 1'''
+        elif OperIdTypeMap[self._id] == OperType.Ternary:
+            self._pred_expression.annotate_width_1()
+            self._lhs_expression.annotate_width_1()
+            self._rhs_expression.annotate_width_1()
+            if (self._id == OperId.ITE):
+                if (self._lhs_expression._width >= self._rhs_expression._width):
+                    self._width = self._lhs_expression._width
+                else:
+                    self._width = self._rhs_expression._width
+            else:
+                print("The OP is not yet supported")
+        else:
+            print("The OP is not yet supported")
+
+    def annotate_width_2(self):
+        if OperIdTypeMap[self._id] == OperType.Binary:
+            if (self._id == OperId.ADD or
+                self._id == OperId.SUB or
+                self._id == OperId.MUL or
+                self._id == OperId.DIV or
+                self._id == OperId.MOD or
+                self._id == OperId.BITAND or
+                self._id == OperId.BITOR or
+                self._id == OperId.BITXOR):
+                if (self._lhs_expression._width != self._width):
+                    self._lhs_expression._width = self._width
+                self._lhs_expression.annotate_width_2()
+                if (self._rhs_expression._width != self._width):
+                    self._rhs_expression._width = self._width
+                self._rhs_expression.annotate_width_2()
+            elif (self._id == OperId.EQ or
+                  self._id == OperId.NEQ or
+                  self._id == OperId.LT or
+                  self._id == OperId.LE or
+                  self._id == OperId.GT or
+                  self._id == OperId.GE):
+                if (self._lhs_expression._width < self._rhs_expression._width):
+                    self._lhs_expression._width = self._rhs_expression._width
+                if (self._lhs_expression._width > self._rhs_expression._width):
+                    self._rhs_expression._width = self._lhs_expression._width
+                self._lhs_expression.annotate_width_2()
+                self._rhs_expression.annotate_width_2()
+            elif (self._id == OperId.BOOLAND or
+                  self._id == OperId.BOOLOR or
+                  self._id == OperId.IMPLY):
+                self._lhs_expression.annotate_width_2()
+                self._rhs_expression.annotate_width_2()
+            elif (self._id == OperId.LSHIFT or
+                  self._id == OperId.RSHIFT):
+                self._lhs_expression._width = self._width
+                self._lhs_expression.annotate_width_2()
+                self._rhs_expression.annotate_width_2()
+
+        elif OperIdTypeMap[self._id] == OperType.Unary:
+            if (self._id == OperId.BOOLNEGATE):
+                self._lhs_expression.annotate_width_2()
+            elif (self._id == OperId.BITNEGATE):
+                self._lhs_expression._width = self._width
+                self._lhs_expression.annotate_width_2()
+            elif (self._id == OperId.MINUS):
+                self._lhs_expression._width = self._width
+                self._lhs_expression.annotate_width_2()
+            else:
+                print("The OP is not yet supported")
+        elif OperIdTypeMap[self._id] == OperType.Ternary:
+            if (self._id == OperId.ITE):
+                if (self._lhs_expression._width != self._width):
+                    self._lhs_expression._width = self._width
+                self._lhs_expression.annotate_width_2()
+                if (self._rhs_expression._width != self._width):
+                    self._rhs_expression._width = self._width
+                self._rhs_expression.annotate_width_2()
+            else:
+                print("The OP is not yet supported")
+        elif OperIdTypeMap[self._id] == OperType.Var:
+            None
+        elif OperIdTypeMap[self._id] == OperType.Const:
+            None
+        else:
+            print("The OP is not yet supported")
+
+
+    def eval(self):
+        if OperIdTypeMap[self._id] == OperType.Binary:
+            lhs_result = self._lhs_expression.eval()
+            rhs_result = self._rhs_expression.eval()
+
+            if (self._id == OperId.ADD):
+                result = lhs_result + rhs_result
+            elif (self._id == OperId.SUB):
+                result = lhs_result - rhs_result
+            elif (self._id == OperId.MUL):
+                result = lhs_result * rhs_result
+            elif (self._id == OperId.DIV):
+                result = lhs_result // rhs_result
+            elif (self._id == OperId.MOD):
+                result = lhs_result % rhs_result
+            elif (self._id == OperId.EQ):
+                result = (lhs_result == rhs_result)
+            elif (self._id == OperId.NEQ):
+                result = (lhs_result != rhs_result)
+            elif (self._id == OperId.LT):
+                result = (lhs_result < rhs_result)
+            elif (self._id == OperId.LE):
+                result = (lhs_result <= rhs_result)
+            elif (self._id == OperId.GT):
+                result = (lhs_result > rhs_result)
+            elif (self._id == OperId.GE):
+                result = (lhs_result >= rhs_result)
+            elif (self._id == OperId.BOOLAND):
+                result = not (not ((lhs_result and rhs_result)))
+            elif (self._id == OperId.BOOLOR):
+                result = not (not ((lhs_result or rhs_result)))
+            elif (self._id == OperId.IMPLY):
+                result = not (not (((not(lhs_result)) or rhs_result)))
+            elif (self._id == OperId.BITAND):
+                result = (lhs_result & rhs_result)
+            elif (self._id == OperId.BITOR):
+                result = (lhs_result | rhs_result)
+            elif (self._id == OperId.BITXOR):
+                result = (lhs_result ^ rhs_result)
+            elif (self._id == OperId.LSHIFT):
+                result = (lhs_result << rhs_result)
+            elif (self._id == OperId.RSHIFT):
+                result = (lhs_result >> rhs_result)
+            else:
+                print("The OP is not yet supported")
+        elif OperIdTypeMap[self._id] == OperType.Unary:
+            lhs_result = self._lhs_expression.eval()
+            if (self._id == OperId.BOOLNEGATE):
+                result = (not(lhs_result))
+            elif (self._id == OperId.BITNEGATE):
+                result = ~(lhs_result)
+            elif (self._id == OperId.MINUS):
+                result = -(lhs_result)
+            else:
+                print("The OP is not yet supported")
+        elif OperIdTypeMap[self._id] == OperType.Var:
+            result = variable_list[self._var]._val
+        elif OperIdTypeMap[self._id] == OperType.Const:
+            result = self._val
+        elif OperIdTypeMap[self._id] == OperType.Ternary:
+            pred_result = self._pred_expression.eval()
+            lhs_result = self._lhs_expression.eval()
+            rhs_result = self._rhs_expression.eval()
+            if (self._id == OperId.ITE):
+                if pred_result != 0:
+                    result = lhs_result
+                else:
+                    result = rhs_result
+            else:
+                print("The OP is not yet supported")
+        else:
+            print("The OP is not yet supported")
+        result = result & ((1 << self._width) - 1)
+        return result
+
+    @classmethod
+    def create(cls, json_expr):
+        id = OperStrIdMap[json_expr['op']]
+        if OperStrTypeMap[json_expr['op']] == OperType.Binary:
+            lhs = Expression.create(json_expr['lhs_expression'])
+            rhs = Expression.create(json_expr['rhs_expression'])
+            expr = Expression(id, lhs, rhs, None, None, None)
+        if OperStrTypeMap[json_expr['op']] == OperType.Unary:
+            lhs = Expression.create(json_expr['lhs_expression'])
+            expr = Expression(id, lhs, None, None, None, None)
+        if OperStrTypeMap[json_expr['op']] == OperType.Ternary:
+            pred = Expression.create(json_expr['pred_expression'])
+            lhs = Expression.create(json_expr['lhs_expression'])
+            rhs = Expression.create(json_expr['rhs_expression'])
+            expr = Expression(id, lhs, rhs, pred, None, None)
+        if OperStrTypeMap[json_expr['op']] == OperType.Var:
+            expr = Expression(id, None, None, None, json_expr['id'], None)
+        if OperStrTypeMap[json_expr['op']] == OperType.Const:
+            expr = Expression(id, None, None, None, None, json_expr['value'])
+        return expr
+        
+
+OperStrIdMap = {'LT': OperId.LT,
+                'LE': OperId.LE,
+                'GT': OperId.GT,
+                'GE': OperId.GE,
+                'EQ': OperId.EQ,
+                'NEQ': OperId.NEQ,
+                'VAR': OperId.VAR,
+                'CONST': OperId.CONST,
+                'LOG_NEG':OperId.BOOLNEGATE,
+                'LOG_AND':OperId.BOOLAND,
+                'LOG_OR':OperId.BOOLOR,
+                'IMPLY':OperId.IMPLY,
+                'BIT_NEG':OperId.BITNEGATE,
+                'BIT_AND':OperId.BITAND,
+                'BIT_OR':OperId.BITOR,
+                'BIT_XOR':OperId.BITXOR,
+                'ADD':OperId.ADD,
+                'SUB':OperId.SUB,
+                'MUL':OperId.MUL,
+                'DIV':OperId.DIV,
+                'MOD':OperId.MOD,
+                'LSHIFT':OperId.LSHIFT,
+                'RSHIFT':OperId.RSHIFT,
+                'TERN':OperId.ITE,
+                'MINUS':OperId.MINUS
+                }
+
+OperStrTypeMap = {'LT': OperType.Binary,
+                  'LE': OperType.Binary,
+                  'GT': OperType.Binary,
+                  'GE': OperType.Binary,
+                  'EQ': OperType.Binary,
+                  'NEQ': OperType.Binary,
+                  'VAR': OperType.Var,
+                  'CONST': OperType.Const,
+                  'LOG_NEG': OperType.Unary,
+                  'LOG_AND': OperType.Binary,
+                  'LOG_OR': OperType.Binary,
+                  'IMPLY': OperType.Binary,
+                  'BIT_NEG': OperType.Unary,
+                  'BIT_AND': OperType.Binary,
+                  'BIT_OR': OperType.Binary,
+                  'BIT_XOR': OperType.Binary,
+                  'ADD': OperType.Binary,
+                  'SUB': OperType.Binary,
+                  'MUL': OperType.Binary,
+                  'DIV': OperType.Binary,
+                  'MOD': OperType.Binary,
+                  'LSHIFT': OperType.Binary,
+                  'RSHIFT': OperType.Binary,
+                  'TERN': OperType.Ternary,
+                  'MINUS': OperType.Unary
+                  }
+
+OperIdTypeMap = {OperId.LT: OperType.Binary,
+                 OperId.LE: OperType.Binary,
+                 OperId.GT: OperType.Binary,
+                 OperId.GE: OperType.Binary,
+                 OperId.EQ: OperType.Binary,
+                 OperId.NEQ: OperType.Binary,
+                 OperId.VAR: OperType.Var,
+                 OperId.CONST: OperType.Const,
+                 OperId.BOOLNEGATE: OperType.Unary,
+                 OperId.BOOLAND: OperType.Binary,
+                 OperId.BOOLOR: OperType.Binary,
+                 OperId.IMPLY: OperType.Binary,
+                 OperId.BITNEGATE: OperType.Unary,
+                 OperId.BITAND: OperType.Binary,
+                 OperId.BITOR: OperType.Binary,
+                 OperId.BITXOR: OperType.Binary,
+                 OperId.ADD: OperType.Binary,
+                 OperId.SUB: OperType.Binary,
+                 OperId.MUL: OperType.Binary,
+                 OperId.DIV: OperType.Binary,
+                 OperId.MOD: OperType.Binary,
+                 OperId.LSHIFT: OperType.Binary,
+                 OperId.RSHIFT: OperType.Binary,
+                 OperId.ITE: OperType.Ternary,
+                 OperId.MINUS: OperType.Unary
+                 }
+
+OperIdStrMap = {OperId.LT: "<",
+                OperId.LE: "<=",
+                OperId.GT: ">",
+                OperId.GE: ">=",
+                OperId.EQ: "==",
+                OperId.NEQ: "!=",
+                OperId.VAR: "v",
+                OperId.CONST: "c",
+                OperId.BOOLNEGATE: "!",
+                OperId.BOOLAND: "&&",
+                OperId.BOOLOR: "||",
+                OperId.IMPLY: "->",
+                OperId.BITNEGATE: "~",
+                OperId.BITAND: "&",
+                OperId.BITOR: "|",
+                OperId.BITXOR: "^",
+                OperId.ADD: "+",
+                OperId.SUB: "-",
+                OperId.MUL: "*",
+                OperId.DIV: "/",
+                OperId.MOD: "%",
+                OperId.LSHIFT: "<<",
+                OperId.RSHIFT: ">>",
+                OperId.ITE: "ITE",
+                OperId.MINUS: "-"
+                }
+
+parser = OptionParser()
+parser.add_option("-p", "--problem_file", dest="prob", help="input file of a constraint problem", metavar="FILE")
+parser.add_option("-a", "--assignment_file", dest="assign", help="input file of the assignments of a constraint problem", metavar="FILE")
+
+(options, args) = parser.parse_args()
+
+print("Problem file: %s, assignment file: %s" % (options.prob,options.assign))
+
+cons_prob_path = options.prob
+
+with open(cons_prob_path) as fp1:
+    json_prob = json.load(fp1)
+
+
+print("\nVariable definitions:")
+i = 0
+for var in json_prob['variable_list']:
+    var_obj = Variable(var['id'], var['name'], var['signed'], var['bit_width'])
+    variable_list.append(var_obj)
+    variable_list[i].print_def()
+    i = i + 1
+
+print("\nConstraints:")
+for cons in json_prob['constraint_list']:
+    cons_obj = Expression.create(cons)
+    constraint_list.append(cons_obj)
+    print(cons_obj.to_str())
+
+
+assign_path = options.assign
+with open(assign_path) as fp2:
+    json_assign = json.load(fp2)
+
+assign_count = 0
+duplicate_count = 0
+fail_count = 0
+for assignment in json_assign['assignment_list']:
+    i = 0
+    a = ""
+    print("\nAssignment %d:" % (assign_count,))
+    for one_assign in assignment:
+        variable_list[i]._val = int(one_assign['value'], 16)
+        #val_arr = one_assign['value'].split("'h", 1)
+        #variable_list[i]._val = int(val_arr[1], 16)
+
+        variable_list[i].print_assign()
+        a += "%x " % (variable_list[i]._val)
+        i+=1
+    if assignment_list.get(a) is None:
+        assignment_list[a] = 1
+    else:
+        duplicate_count += 1
+    '''print("\nAssignment string:\n%s" %(a,))'''
+    print("\nConstraints are evaluated as below:")
+    failed = 0
+    for cons in constraint_list:
+        cons.annotate_width_1()
+        cons.annotate_width_2()
+        result = not(not(cons.eval()))
+        print("%s : %x" % (cons.to_type_str(), result))
+        if result == 0:
+            failed = 1
+    assign_count += 1
+    if failed == 1:
+        fail_count += 1
+
+if fail_count == 0:
+    if duplicate_count == 0:
+        print("\nPASS, duplicate assignments:%d, score:%f" %(duplicate_count, 100))
+    else:
+        print("\nPASS, duplicate assignments:%d, score:%f" %(duplicate_count, 100 * ((assign_count - duplicate_count) / assign_count)))
+else:
+    print("\nFAIL, failed count:%d" %(fail_count,))
+
+

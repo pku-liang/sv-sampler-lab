@@ -1,0 +1,407 @@
+{
+    "variable_list": [
+        {
+            "id": 0,
+            "name": "var_0",
+            "signed": false,
+            "bit_width": 27
+        },
+        {
+            "id": 1,
+            "name": "var_1",
+            "signed": false,
+            "bit_width": 41
+        },
+        {
+            "id": 2,
+            "name": "var_2",
+            "signed": false,
+            "bit_width": 29
+        },
+        {
+            "id": 3,
+            "name": "var_3",
+            "signed": false,
+            "bit_width": 52
+        },
+        {
+            "id": 4,
+            "name": "var_4",
+            "signed": false,
+            "bit_width": 46
+        },
+        {
+            "id": 5,
+            "name": "var_5",
+            "signed": false,
+            "bit_width": 25
+        },
+        {
+            "id": 6,
+            "name": "var_6",
+            "signed": false,
+            "bit_width": 17
+        },
+        {
+            "id": 7,
+            "name": "var_7",
+            "signed": false,
+            "bit_width": 29
+        },
+        {
+            "id": 8,
+            "name": "var_8",
+            "signed": false,
+            "bit_width": 6
+        },
+        {
+            "id": 9,
+            "name": "var_9",
+            "signed": false,
+            "bit_width": 38
+        },
+        {
+            "id": 10,
+            "name": "var_10",
+            "signed": false,
+            "bit_width": 47
+        },
+        {
+            "id": 11,
+            "name": "var_11",
+            "signed": false,
+            "bit_width": 41
+        },
+        {
+            "id": 12,
+            "name": "var_12",
+            "signed": false,
+            "bit_width": 27
+        },
+        {
+            "id": 13,
+            "name": "var_13",
+            "signed": false,
+            "bit_width": 52
+        },
+        {
+            "id": 14,
+            "name": "var_14",
+            "signed": false,
+            "bit_width": 27
+        },
+        {
+            "id": 15,
+            "name": "var_15",
+            "signed": false,
+            "bit_width": 40
+        },
+        {
+            "id": 16,
+            "name": "var_16",
+            "signed": false,
+            "bit_width": 29
+        },
+        {
+            "id": 17,
+            "name": "var_17",
+            "signed": false,
+            "bit_width": 53
+        },
+        {
+            "id": 18,
+            "name": "var_18",
+            "signed": false,
+            "bit_width": 8
+        },
+        {
+            "id": 19,
+            "name": "var_19",
+            "signed": false,
+            "bit_width": 20
+        }
+    ],
+    "constraint_list": [
+        {
+            "op": "BIT_XOR",
+            "lhs_expression": {
+                "op": "ADD",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 2
+                },
+                "rhs_expression": {
+                    "op": "CONST",
+                    "value": "32'h214c87d"
+                }
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 6
+            }
+        },
+        {
+            "op": "RSHIFT",
+            "lhs_expression": {
+                "op": "LSHIFT",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 0
+                },
+                "rhs_expression": {
+                    "op": "CONST",
+                    "value": "27'h12"
+                }
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "27'h3"
+            }
+        },
+        {
+            "op": "MUL",
+            "lhs_expression": {
+                "op": "LOG_NEG",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 18
+                }
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 8
+            }
+        },
+        {
+            "op": "IMPLY",
+            "lhs_expression": {
+                "op": "LOG_NEG",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 0
+                }
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "1'h0"
+            }
+        },
+        {
+            "op": "SUB",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 5
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 18
+            }
+        },
+        {
+            "op": "NEQ",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 4
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 6
+            }
+        },
+        {
+            "op": "IMPLY",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 17
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 7
+            }
+        },
+        {
+            "op": "BIT_OR",
+            "lhs_expression": {
+                "op": "RSHIFT",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 15
+                },
+                "rhs_expression": {
+                    "op": "CONST",
+                    "value": "40'h9"
+                }
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "40'ha71ca2ef72"
+            }
+        },
+        {
+            "op": "MUL",
+            "lhs_expression": {
+                "op": "BIT_OR",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 18
+                },
+                "rhs_expression": {
+                    "op": "CONST",
+                    "value": "8'h4"
+                }
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "8'ha"
+            }
+        },
+        {
+            "op": "RSHIFT",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 14
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "27'h4"
+            }
+        },
+        {
+            "op": "ADD",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 16
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 12
+            }
+        },
+        {
+            "op": "NEQ",
+            "lhs_expression": {
+                "op": "BIT_OR",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 2
+                },
+                "rhs_expression": {
+                    "op": "VAR",
+                    "id": 5
+                }
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "64'h1b4e37e1"
+            }
+        },
+        {
+            "op": "ADD",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 0
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 12
+            }
+        },
+        {
+            "op": "ADD",
+            "lhs_expression": {
+                "op": "BIT_NEG",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 7
+                }
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 14
+            }
+        },
+        {
+            "op": "NEQ",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 6
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "64'h608d"
+            }
+        },
+        {
+            "op": "ADD",
+            "lhs_expression": {
+                "op": "LOG_NEG",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 6
+                }
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 0
+            }
+        },
+        {
+            "op": "NEQ",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 4
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 7
+            }
+        },
+        {
+            "op": "NEQ",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 1
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "64'h18e69585ec5"
+            }
+        },
+        {
+            "op": "NEQ",
+            "lhs_expression": {
+                "op": "LOG_AND",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 19
+                },
+                "rhs_expression": {
+                    "op": "VAR",
+                    "id": 7
+                }
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "64'h1"
+            }
+        },
+        {
+            "op": "NEQ",
+            "lhs_expression": {
+                "op": "NEQ",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 12
+                },
+                "rhs_expression": {
+                    "op": "CONST",
+                    "value": "64'h44a702e"
+                }
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 18
+            }
+        }
+    ]
+}

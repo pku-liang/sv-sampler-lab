@@ -1,0 +1,198 @@
+{
+    "variable_list": [
+        {
+            "id": 0,
+            "name": "var_0",
+            "signed": false,
+            "bit_width": 16
+        },
+        {
+            "id": 1,
+            "name": "var_1",
+            "signed": false,
+            "bit_width": 22
+        },
+        {
+            "id": 2,
+            "name": "var_2",
+            "signed": false,
+            "bit_width": 4
+        },
+        {
+            "id": 3,
+            "name": "var_3",
+            "signed": false,
+            "bit_width": 28
+        },
+        {
+            "id": 4,
+            "name": "var_4",
+            "signed": false,
+            "bit_width": 19
+        },
+        {
+            "id": 5,
+            "name": "var_5",
+            "signed": false,
+            "bit_width": 18
+        },
+        {
+            "id": 6,
+            "name": "var_6",
+            "signed": false,
+            "bit_width": 19
+        },
+        {
+            "id": 7,
+            "name": "var_7",
+            "signed": false,
+            "bit_width": 14
+        },
+        {
+            "id": 8,
+            "name": "var_8",
+            "signed": false,
+            "bit_width": 16
+        },
+        {
+            "id": 9,
+            "name": "var_9",
+            "signed": false,
+            "bit_width": 29
+        }
+    ],
+    "constraint_list": [
+        {
+            "op": "BIT_NEG",
+            "lhs_expression": {
+                "op": "LSHIFT",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 2
+                },
+                "rhs_expression": {
+                    "op": "CONST",
+                    "value": "4'h0"
+                }
+            }
+        },
+        {
+            "op": "LOG_AND",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 4
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 1
+            }
+        },
+        {
+            "op": "NEQ",
+            "lhs_expression": {
+                "op": "LOG_NEG",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 7
+                }
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 1
+            }
+        },
+        {
+            "op": "MUL",
+            "lhs_expression": {
+                "op": "BIT_NEG",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 2
+                }
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 2
+            }
+        },
+        {
+            "op": "LOG_OR",
+            "lhs_expression": {
+                "op": "LOG_NEG",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 5
+                }
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 3
+            }
+        },
+        {
+            "op": "LOG_OR",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 2
+            },
+            "rhs_expression": {
+                "op": "VAR",
+                "id": 6
+            }
+        },
+        {
+            "op": "BIT_NEG",
+            "lhs_expression": {
+                "op": "LOG_AND",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 0
+                },
+                "rhs_expression": {
+                    "op": "VAR",
+                    "id": 6
+                }
+            }
+        },
+        {
+            "op": "DIV",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 2
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "4'h4"
+            }
+        },
+        {
+            "op": "BIT_XOR",
+            "lhs_expression": {
+                "op": "VAR",
+                "id": 8
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "16'hb816"
+            }
+        },
+        {
+            "op": "BIT_XOR",
+            "lhs_expression": {
+                "op": "NEQ",
+                "lhs_expression": {
+                    "op": "VAR",
+                    "id": 7
+                },
+                "rhs_expression": {
+                    "op": "CONST",
+                    "value": "32'h37fd"
+                }
+            },
+            "rhs_expression": {
+                "op": "CONST",
+                "value": "1'h1"
+            }
+        }
+    ]
+}
