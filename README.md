@@ -88,6 +88,20 @@
 
 每个部分包含多个测试点，通过一个测试点即可拿到对应比例的分数（ $n$ 个测试点通过了 $k$ 个即可拿到分数的 $\frac{k}{n}$）。
 
+### 评测程序
+当你按照要求实现好了 `run.sh` 之后，运行
+```bash
+./evaluate.sh [basic|opt1|opt2|opt3|opt4|op5|all]
+```
+就可以评测对应的部分或者全部测试用例。
+
+### evalcns使用
+`evalcns` 检测生成的随机解的合法性，运行
+```bash
+./evalcns -p constraint.json -a result.json
+```
+就可验证随机解是否符合约束
+
 ## 性能优化Hint
 - 根据电路结构求得一个变量初始顺序，调用 `Cudd_ShuffleHeap` 设置手动变量顺序
 - 使用CUDD中动态变量重排策略，调用 `Cudd_AutodynEnable` 开启。
