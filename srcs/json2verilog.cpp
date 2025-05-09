@@ -19,104 +19,52 @@ std::string generateExpression(const json& expression, const json& variableList)
         return expression["value"];
     }
     
-    // Logical operations
+    // Unary operators
     else if (op == "LOG_NEG") {
         return "!(" + generateExpression(expression["lhs_expression"], variableList) + ")";
-    } else if (op == "LOG_AND") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " && " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    } else if (op == "LOG_OR") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " || " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    } else if (op == "IMPLY") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " -> " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    } else if (op == "IFF") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " <-> " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    }
-    
-    // Arithmetic operations
-    else if (op == "ADD") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " + " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "BIT_NEG") {
+        return "~(" + generateExpression(expression["lhs_expression"], variableList) + ")";
     } else if (op == "MINUS") {
         return "(-" + generateExpression(expression["lhs_expression"], variableList) + ")";
+    }
+    
+    // Binary operators
+    else if (op == "ADD") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " + " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "SUB") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " - " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "MUL") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " * " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "DIV") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " / " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    } else if (op == "MOD") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " % " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    }
-    
-    // Bitwise operations
-    else if (op == "BIT_NEG") {
-        return "~(" + generateExpression(expression["lhs_expression"], variableList) + ")";
+    } else if (op == "LOG_AND") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " && " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "LOG_OR") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " || " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "EQ") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " == " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "NEQ") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " != " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "LT") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " < " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "LTE") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " <= " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "GT") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " > " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "GTE") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " >= " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "BIT_AND") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " & " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "BIT_OR") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " | " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "BIT_XOR") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " ^ " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    } else if (op == "LSHIFT") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " << " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "RSHIFT") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " >> " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    }
-    
-    // Relational operations
-     else if (op == "EQ") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " == " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    } else if (op == "NEQ") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " != " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    } else if (op == "GT") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " > " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    } else if (op == "GTE") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " >= " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    } else if (op == "LT") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " < " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    } else if (op == "LTE") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " <= " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    }
-    
-    // Casting operations
-    else if (op == "CAST") {
-        // 获取目标类型和位宽
-        int targetWidth = expression["bit_width"];
-        bool isSigned = expression.contains("signed") ? expression["signed"].get<bool>() : false;
-        
-        std::string innerExpr = generateExpression(expression["lhs_expression"], variableList);
-        return std::string(isSigned ? "$signed" : "$unsigned") + "(" + innerExpr + ")";
-    }
-    
-    // Conditional operation
-    else if (op == "COND") {
-        return "(" + generateExpression(expression["condition"], variableList) + " ? " +
-               generateExpression(expression["true_expr"], variableList) + " : " +
-               generateExpression(expression["false_expr"], variableList) + ")";
-    }
-    
-    // Concatenation
-    else if (op == "CONCAT") {
-        return "{" + generateExpression(expression["lhs_expression"], variableList) + ", " +
-               generateExpression(expression["rhs_expression"], variableList) + "}";
-    }
-    
-    // Replication
-    else if (op == "REPLICATE") {
-        return "{" + expression["count"].get<std::string>() + "{" +
-               generateExpression(expression["lhs_expression"], variableList) + "}}";
-    }
-    
-    // Array access
-    else if (op == "ARRAY_INDEX") {
-        return generateExpression(expression["array"], variableList) + "[" +
-               generateExpression(expression["index"], variableList) + "]";
-    }
-    
-    // Range selection
-    else if (op == "RANGE") {
-        return generateExpression(expression["lhs_expression"], variableList) + "[" +
-               generateExpression(expression["high"], variableList) + ":" +
-               generateExpression(expression["low"], variableList) + "]";
+    } else if (op == "LSHIFT") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " << " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "IMPLY") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " -> " + generateExpression(expression["rhs_expression"], variableList) + ")";
     }
 
     // Other unsupported operations
