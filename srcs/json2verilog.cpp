@@ -3,77 +3,168 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using json = nlohmann::json;
 
-// 生成 Verilog 表达式的递归函数
+// recursively generate the expression string
 std::string generateExpression(const json& expression, const json& variableList) {
     std::string op = expression["op"];
+    
+    // Basic operands
     if (op == "VAR") {
         int id = expression["id"];
         return variableList[id]["name"];
     } else if (op == "CONST") {
         return expression["value"];
-    } else if (op == "BIT_NEG") {
-        return "~(" + generateExpression(expression["lhs_expression"], variableList) + ")";
-    } else if (op == "LOG_NEG") {
+    }
+    
+    // Logical operations
+    else if (op == "LOG_NEG") {
         return "!(" + generateExpression(expression["lhs_expression"], variableList) + ")";
-    } else if (op == "ADD") {
+    } else if (op == "LOG_AND") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " && " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "LOG_OR") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " || " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "IMPLY") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " -> " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "IFF") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " <-> " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    }
+    
+    // Arithmetic operations
+    else if (op == "ADD") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " + " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "MINUS") {
+        return "(-" + generateExpression(expression["lhs_expression"], variableList) + ")";
     } else if (op == "SUB") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " - " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "MUL") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " * " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "DIV") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " / " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "MOD") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " % " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    }
+    
+    // Bitwise operations
+    else if (op == "BIT_NEG") {
+        return "~(" + generateExpression(expression["lhs_expression"], variableList) + ")";
+    } else if (op == "BIT_AND") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " & " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "BIT_OR") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " | " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "BIT_XOR") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " ^ " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    } else if (op == "LOG_AND") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " && " + generateExpression(expression["rhs_expression"], variableList) + ")";
-    } else if (op == "RSHIFT") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " >> " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "LSHIFT") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " << " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "RSHIFT") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " >> " + generateExpression(expression["rhs_expression"], variableList) + ")";
     }
-    return "";
+    
+    // Relational operations
+     else if (op == "EQ") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " == " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "NEQ") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " != " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "GT") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " > " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "GTE") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " >= " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "LT") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " < " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    } else if (op == "LTE") {
+        return "(" + generateExpression(expression["lhs_expression"], variableList) + " <= " + generateExpression(expression["rhs_expression"], variableList) + ")";
+    }
+    
+    // Casting operations
+    else if (op == "CAST") {
+        // 获取目标类型和位宽
+        int targetWidth = expression["bit_width"];
+        bool isSigned = expression.contains("signed") ? expression["signed"].get<bool>() : false;
+        
+        std::string innerExpr = generateExpression(expression["lhs_expression"], variableList);
+        return std::string(isSigned ? "$signed" : "$unsigned") + "(" + innerExpr + ")";
+    }
+    
+    // Conditional operation
+    else if (op == "COND") {
+        return "(" + generateExpression(expression["condition"], variableList) + " ? " +
+               generateExpression(expression["true_expr"], variableList) + " : " +
+               generateExpression(expression["false_expr"], variableList) + ")";
+    }
+    
+    // Concatenation
+    else if (op == "CONCAT") {
+        return "{" + generateExpression(expression["lhs_expression"], variableList) + ", " +
+               generateExpression(expression["rhs_expression"], variableList) + "}";
+    }
+    
+    // Replication
+    else if (op == "REPLICATE") {
+        return "{" + expression["count"].get<std::string>() + "{" +
+               generateExpression(expression["lhs_expression"], variableList) + "}}";
+    }
+    
+    // Array access
+    else if (op == "ARRAY_INDEX") {
+        return generateExpression(expression["array"], variableList) + "[" +
+               generateExpression(expression["index"], variableList) + "]";
+    }
+    
+    // Range selection
+    else if (op == "RANGE") {
+        return generateExpression(expression["lhs_expression"], variableList) + "[" +
+               generateExpression(expression["high"], variableList) + ":" +
+               generateExpression(expression["low"], variableList) + "]";
+    }
+
+    // Other unsupported operations
+    std::cerr << "Warning: Unsupported operator '" << op << "'" << std::endl;
+    return "";  
 }
 
-// 主函数：解析 JSON 并生成 Verilog
+// get json_file from cmd and generate verilog file
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "用法: " << argv[0] << " <输入文件路径>" << std::endl;
+        std::cerr << "syntax error. Try " << argv[0] << " <json_file>" << std:: endl;
         return 1;
     }
 
     std::string inputFilePath = argv[1];
 
-    // 打开 JSON 文件
+    // open json file
     std::ifstream inputFile(inputFilePath);
     if (!inputFile.is_open()) {
-        std::cerr << "无法打开输入文件：" << inputFilePath << std::endl;
+        std::cerr << "Unable to open:" << inputFilePath << std::endl;
         return 1;
     }
 
-    // 解析 JSON 数据
     json inputJson;
     inputFile >> inputJson;
 
-    // 提取变量列表和约束
-    const auto& variableList = inputJson["variable_list"];
+    auto& variableList = inputJson["variable_list"];
     const auto& constraintList = inputJson["constraint_list"];
 
-    // 创建输出文件夹
-    std::ofstream outputFile("verilogFile/output.v");
+    // create output directory
+    std::ofstream outputFile("./run_dir/json2verilog.v");
     if (!outputFile.is_open()) {
-        std::cerr << "无法创建输出文件！" << std::endl;
+        std::cerr << "Unable to create output file" << std::endl;
         return 1;
     }
 
     outputFile << "module generated_module(";
 
-    // 写出所有输入端口名
+    //remove the quotes from the variable names
     for (size_t i = 0; i < variableList.size(); ++i) {
-        outputFile << variableList[i]["name"];
+        std::string name = variableList[i]["name"].get<std::string>();
+        name.erase(std::remove(name.begin(), name.end(), '"'), name.end());
+        variableList[i]["name"] = name;
+    }
+
+    // write variavle names
+    for (size_t i = 0; i < variableList.size(); ++i) {
+        outputFile << variableList[i]["name"].get<std::string>();
         if (i != variableList.size() - 1) {
             outputFile << ", ";
         }
@@ -81,17 +172,17 @@ int main(int argc, char* argv[]) {
 
     outputFile << ");" << std::endl;
 
-    // 写变量定义
+    // write variable declarations
     for (size_t i = 0; i < variableList.size(); ++i) {
         outputFile << "    input "
                    << (variableList[i]["signed"] ? "signed " : "")
                    << "[" << (static_cast<int>(variableList[i]["bit_width"]) - 1) << ":0] "
-                   << variableList[i]["name"] << ";" << std::endl;
+                   << variableList[i]["name"].get<std::string>() << ";" << std::endl;
     }
 
     outputFile << std::endl;
 
-    // 写约束表达式逻辑为 wire
+    // write constraints
     for (size_t i = 0; i < constraintList.size(); ++i) {
         std::string expr = generateExpression(constraintList[i], variableList);
         outputFile << "    wire constraint_" << i << " = " << expr << ";" << std::endl;
@@ -99,7 +190,7 @@ int main(int argc, char* argv[]) {
 
     outputFile << "endmodule" << std::endl;
 
-    std::cout << "Verilog 文件已生成：verilogFile/output.v" << std::endl;
+    std::cout << "Verilog file has been created : ./run_dir/json2verilog.v" << std::endl;
 
     return 0;
 }
