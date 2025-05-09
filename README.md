@@ -42,6 +42,7 @@
   "value": "1'h1"
 }
 ```
+完整的op列表见 [operators_list.txt](operators_list.txt)。需要注意如果表达式中存在除法（/）运算，那么随机解需要满足 `rhs_expression` 表达式的值不能等于0。
 
 每个测试用例还有一个txt文件，帮助直观地查看约束表达式。可以先看一下 [basic/0.json](https://github.com/pku-liang/sv-sampler-lab/blob/main/basic/0.json) 和 [basic/0.txt](https://github.com/pku-liang/sv-sampler-lab/blob/main/basic/0.txt) 帮助理解。
 
