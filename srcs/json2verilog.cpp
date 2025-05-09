@@ -36,7 +36,8 @@ std::string generateExpression(const json& expression, const json& variableList)
     } else if (op == "MUL") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " * " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "DIV") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " / " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        std::string divisor = generateExpression(expression["rhs_expression"], variableList);
+        return "(" + divisor + " == 0 ? 0 : " + generateExpression(expression["lhs_expression"], variableList) + " / " + divisor + ")";
     } else if (op == "LOG_AND") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " && " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "LOG_OR") {
@@ -133,7 +134,8 @@ int main(int argc, char* argv[]) {
     // write constraints
     for (size_t i = 0; i < constraintList.size(); ++i) {
         std::string expr = generateExpression(constraintList[i], variableList);
-        outputFile << "    wire constraint_" << i << " = " << expr << ";" << std::endl;
+        outputFile << "    wire constraint_" << i << ';' << std::endl;
+        outputFile << "    assign constraint_" << i << " = |(" << expr << ");" << std::endl;
     }
 
     outputFile << "endmodule" << std::endl;
