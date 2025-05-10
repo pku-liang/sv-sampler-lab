@@ -21,9 +21,9 @@ std::string generateExpression(const json& expression, const json& variableList)
     
     // Unary operators
     else if (op == "LOG_NEG") {
-        return "!(" + generateExpression(expression["lhs_expression"], variableList) + ")";
+        return "(!(" + generateExpression(expression["lhs_expression"], variableList) + "))";
     } else if (op == "BIT_NEG") {
-        return "~(" + generateExpression(expression["lhs_expression"], variableList) + ")";
+        return "(~(" + generateExpression(expression["lhs_expression"], variableList) + "))";
     } else if (op == "MINUS") {
         return "(-" + generateExpression(expression["lhs_expression"], variableList) + ")";
     }
@@ -65,7 +65,8 @@ std::string generateExpression(const json& expression, const json& variableList)
     } else if (op == "LSHIFT") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " << " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "IMPLY") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " -> " + generateExpression(expression["rhs_expression"], variableList) + ")";
+         // IMPLY (a -> b) is equivalent to (!a || b)
+        return "(~" + generateExpression(expression["lhs_expression"], variableList) + " || " + generateExpression(expression["rhs_expression"], variableList) + ")";
     }
 
     // Other unsupported operations
