@@ -144,9 +144,8 @@ int main(int argc, char* argv[]) {
     // assign constraints
     for (size_t i = 0; i < constraintList.size(); ++i) {
         std::string expr = generateExpression(constraintList[i], variableList);
-        outputFile << "    assign constraint_" << i << " = " << expr << ";" << std::endl;
+        outputFile << "    assign constraint_" << i << " = |(" << expr << ");" << std::endl;
     }
-
     outputFile << "endmodule" << std::endl;
 
     std::cout << "Verilog file has been created : ./run_dir/json2verilog.v" << std::endl;
