@@ -1,0 +1,44 @@
+{
+  "assignment_list": [
+    // 解 #1
+    [
+      { "value": "183f" }, // id=0的变量赋值：var_0
+      { "value": "0eb8" }, // id=1的变量赋值：var_1
+      { "value": "07fe" }, // id=2的变量赋值：var_2
+      { "value": "3c4e" }, // id=3的变量赋值：var_3
+      { "value": "f1" } // id=4的变量赋值：var_4
+    ],
+    // 解 #2
+    [
+      { "value": "1ebe" }, // id=0的变量赋值：var_0
+      { "value": "1eac" }, // id=1的变量赋值：var_1
+      { "value": "0576" }, // id=2的变量赋值：var_2
+      { "value": "1a84" }, // id=3的变量赋值：var_3
+      { "value": "a0" } // id=4的变量赋值：var_4
+    ],
+    // 解 #3
+    [
+      { "value": "1a7f" }, // id=0的变量赋值：var_0
+      { "value": "1e1a" }, // id=1的变量赋值：var_1
+      { "value": "173e" }, // id=2的变量赋值：var_2
+      { "value": "0c06" }, // id=3的变量赋值：var_3
+      { "value": "2e" } // id=4的变量赋值：var_4
+    ],
+    // 解 #4
+    [
+      { "value": "1116" }, // id=0的变量赋值：var_0
+      { "value": "0486" }, // id=1的变量赋值：var_1
+      { "value": "2ab3" }, // id=2的变量赋值：var_2
+      { "value": "13b9" }, // id=3的变量赋值：var_3
+      { "value": "f2" } // id=4的变量赋值：var_4
+    ],
+    // 解 #5
+    [
+      { "value": "14a2" }, // id=0的变量赋值：var_0
+      { "value": "17e1" }, // id=1的变量赋值：var_1
+      { "value": "2831" }, // id=2的变量赋值：var_2
+      { "value": "0c97" }, // id=3的变量赋值：var_3
+      { "value": "c0" } // id=4的变量赋值：var_4
+    ]
+  ]
+}

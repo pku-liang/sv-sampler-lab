@@ -1,8 +1,9 @@
-    #include <iostream>
+#include <iostream>
     #include <vector>
     #include <string>
     #include <map>
     #include "cudd.h"
+    #include "cuddInt.h"
     #include <fstream>
     #include <sstream>
     #include <filesystem>  // 包含文件系统库
@@ -105,7 +106,7 @@
             }
 
             // 关闭文件
-            std::cout << "File loaded successfully: " << filename << std::endl;
+            
             file.close();
             return 0;
         }
@@ -141,7 +142,7 @@
                 std::string var_name = aag.inputs[i].second;
                 
                 // 保存变量名
-                var_names[i] = var_name.empty() ? "var_" + std::to_string(i) : var_name;
+                var_names[i] = var_name;
                 
                 // 创建 BDD 变量
                 DdNode* var = Cudd_bddIthVar(manager, i);
@@ -152,7 +153,7 @@
                 DdNode* not_var = Cudd_Not(var);
                 var_to_bdd[var_idx + 1] = not_var;
                 
-                std::cout << "Created variable " << var_names[i] << " (index: " << var_idx << ")" << std::endl;
+                
             }
             
             // 2. 处理 AND 门
@@ -185,10 +186,7 @@
                     Cudd_Ref(bdd_out);  // 引用计数
                     output_bdds.push_back(bdd_out);
                     
-                    // 使用输出名称
-                    std::cout << "Output " << i << ": " 
-                            << (out_name.empty() ? "out_" + std::to_string(i) : out_name)
-                            << " (index: " << out_idx << ")" << std::endl;
+                    
                 }
             }
             
@@ -260,31 +258,26 @@
                 }
             }
         }
+
+        // 获取 CUDD 管理器
+        DdManager* getManager() {
+            return manager;
+        }
+
+        // 获取输出 BDD 节点数组
+        std::vector<DdNode*>& getOutputBdds() {
+            return output_bdds;
+        }
+
+        // 获取输入变量名数组
+        std::vector<std::string>& getVarNames() {
+            return var_names;
+        }
+
+        // 获取输入变量信息
+        const std::vector<std::pair<int, std::string>>& getInputs() const {
+            return aag.inputs;
+        }
     };
 
-    int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        std::cerr << "Syntax error. Try " << argv[0] << " <aag_file>" << std::endl;
-        return 1;
-    }
 
-    AAGBDD aagbdd;
-    
-    if (aagbdd.load_aag(argv[1]) != 0) {
-        std::cerr << "Failed to load AAG file: " << argv[1] << std::endl;
-        return 1;
-    }
-    
-    aagbdd.initBDDManager();
-    
-    if (aagbdd.buildBDD() != 0) {
-        std::cerr << "Failed to build BDD" << std::endl;
-        return 1;
-    }
-
-    // 调用导出 BDD 的函数，将文件导出到 run_dir 文件夹下
-    aagbdd.exportBDDs("output_");
-
-    return 0;
-    }
-    
