@@ -65,8 +65,10 @@ std::string generateExpression(const json& expression, const json& variableList)
     } else if (op == "LSHIFT") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " << " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "IMPLY") {
-         // IMPLY (a -> b) is equivalent to (!a || b)
-        return "(~" + generateExpression(expression["lhs_expression"], variableList) + " || " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        // For multi-bit, (lhs != 0) -> (rhs != 0)
+        std::string lhs = generateExpression(expression["lhs_expression"], variableList);
+        std::string rhs = generateExpression(expression["rhs_expression"], variableList);
+        return "(!(" + lhs + " != 0) || (" + rhs + " != 0))";
     }
 
     // Other unsupported operations
@@ -144,9 +146,8 @@ int main(int argc, char* argv[]) {
     // assign constraints
     for (size_t i = 0; i < constraintList.size(); ++i) {
         std::string expr = generateExpression(constraintList[i], variableList);
-        outputFile << "    assign constraint_" << i << " = " << expr << ";" << std::endl;
+        outputFile << "    assign constraint_" << i << " = |(" << expr << ");" << std::endl;
     }
-
     outputFile << "endmodule" << std::endl;
 
     std::cout << "Verilog file has been created : ./run_dir/json2verilog.v" << std::endl;
