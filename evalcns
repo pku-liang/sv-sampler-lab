@@ -536,10 +536,10 @@ for assignment in json_assign['assignment_list']:
 
 if fail_count == 0:
     if duplicate_count == 0:
-        print("\nPASS, duplicate assignments:%d, score:%f" %(duplicate_count, 100))
+        print("\nPASS duplicate assignments:%d score:%f" %(duplicate_count, 100))
     else:
-        print("\nPASS, duplicate assignments:%d, score:%f" %(duplicate_count, 100 * ((assign_count - duplicate_count) / assign_count)))
+        print("\nPASS duplicate assignments:%d score:%f" %(duplicate_count, 100 * ((assign_count - duplicate_count) / assign_count)))
 else:
-    print("\nFAIL, failed count:%d" %(fail_count,))
+    print("\nFAIL failed count:%d" %(fail_count,))
 
 

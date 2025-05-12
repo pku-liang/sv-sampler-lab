@@ -1,7 +1,8 @@
 /PASS/ {
     flag=1;
     split($4,a,":")
-    printf "%s\n", a[2]
+    split($3,b,":")
+    printf "%s %s\n", b[2], a[2]
 }
 
 END {

@@ -21,15 +21,21 @@ run() {
         fi
         return 1
     fi
-
-    local valid=$(./evalcns -p ${cnstr_file} -a ${run_dir}/result.json 2> /dev/null | awk -f parse_evalcns.awk)
+		echo "{\"assignment_list\": []}" > ${run_dir}/result.json
+    valid=($(./evalcns -p ${cnstr_file} -a ${run_dir}/result.json 2> /dev/null | awk -f parse_evalcns.awk))
     if [ $? -ne 0 ]; then
         echo "Solution checking has runtime error in ${run_dir}" >&2
         echo "-1"
         return 1
     fi
-    
-    if [ "${valid:0:3}" != "100" ]; then
+
+    if [ "${valid[0]}" != 1000 ]; then
+        echo "Not enough solution generated, generate ${valid[0]}, required 1000" >& 2
+        echo "-1"
+        return 1
+    fi
+
+    if [ "${valid[1]:0:3}" != "100" ] ; then
         echo "Solution checking does not pass in ${run_dir}" >&2
         echo "-1"
         return 1
@@ -61,7 +67,7 @@ evaluate() {
 
     for((i=0;i<10;i=i+1)); do
         if [ "${runtime[$i]}" == "-1" ]; then
-            echo "Failed\n" >&2
+            echo "Failed" >&2
             return 1
         fi
     done
@@ -74,6 +80,8 @@ evaluate() {
     
     echo "${result[@]}"
     echo "Max: ${result[0]}, 8-th: ${result[1]}, Median: ${result[2]}" >&2
+
+    return 0
 }
 
 test() {
@@ -100,11 +108,14 @@ test() {
         for((i=0;i<$total;i=i+1)); do
             local cnstr_file=$dir/$i.json
             mkdir -p "$rundir/$i"
-            local result=($(evaluate $tlim $cnstr_file "$rundir/$i"))
-            local verdict=$(echo "scale=3; ${result[$result_id]} <= ${max_time}" | bc)
-            
-            if [ "$verdict" == "1" ]; then
-                local passed=$((passed+1))
+            result=($(evaluate $tlim $cnstr_file "$rundir/$i"))
+            if [ $? -eq 0 ]; then
+                echo "OK"
+                local verdict=$(echo "scale=3; ${result[$result_id]} <= ${max_time}" | bc)
+
+                if [ "$verdict" == "1" ]; then
+                    local passed=$((passed+1))
+                fi
             fi
         done
 
