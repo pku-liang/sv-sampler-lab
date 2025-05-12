@@ -6,7 +6,7 @@
     #include "cuddInt.h"
     #include <fstream>
     #include <sstream>
-    #include <filesystem>  // 包含文件系统库
+    #include <filesystem> 
 
     class AAGBDD {
     private:
@@ -272,11 +272,6 @@
         // 获取输入变量名数组
         std::vector<std::string>& getVarNames() {
             return var_names;
-        }
-
-        // 获取输入变量信息
-        const std::vector<std::pair<int, std::string>>& getInputs() const {
-            return aag.inputs;
         }
     };
 
