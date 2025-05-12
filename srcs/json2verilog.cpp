@@ -65,8 +65,10 @@ std::string generateExpression(const json& expression, const json& variableList)
     } else if (op == "LSHIFT") {
         return "(" + generateExpression(expression["lhs_expression"], variableList) + " << " + generateExpression(expression["rhs_expression"], variableList) + ")";
     } else if (op == "IMPLY") {
-         // IMPLY (a -> b) is equivalent to (!a || b)
-        return "(~" + generateExpression(expression["lhs_expression"], variableList) + " || " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        // For multi-bit, (lhs != 0) -> (rhs != 0)
+        std::string lhs = generateExpression(expression["lhs_expression"], variableList);
+        std::string rhs = generateExpression(expression["rhs_expression"], variableList);
+        return "(!(" + lhs + " != 0) || (" + rhs + " != 0))";
     }
 
     // Other unsupported operations
