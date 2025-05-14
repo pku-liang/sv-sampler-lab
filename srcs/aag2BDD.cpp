@@ -81,7 +81,7 @@ public:
         nodes.resize(max_idx + 1, nullptr);
         
         // 常数节点（AIG 中的 0，对应 BDD 中的常数 1）
-        nodes[0] = Cudd_ReadOne(manager); 
+        nodes[0] = Cudd_ReadLogicZero(manager); 
         Cudd_Ref(nodes[0]);
         node_names[0] = "CONST_1";
         
