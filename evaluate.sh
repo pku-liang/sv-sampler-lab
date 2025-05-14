@@ -21,7 +21,7 @@ run() {
         fi
         return 1
     fi
-		echo "{\"assignment_list\": []}" > ${run_dir}/result.json
+		
     valid=($(./evalcns -p ${cnstr_file} -a ${run_dir}/result.json 2> /dev/null | awk -f parse_evalcns.awk))
     if [ $? -ne 0 ]; then
         echo "Solution checking has runtime error in ${run_dir}" >&2
@@ -29,6 +29,7 @@ run() {
         return 1
     fi
 
+		echo "${valid[0]}" >&2 
     if [ "${valid[0]}" != 1000 ]; then
         echo "Not enough solution generated, generate ${valid[0]}, required 1000" >& 2
         echo "-1"
