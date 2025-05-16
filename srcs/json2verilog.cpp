@@ -114,18 +114,14 @@ int main(int argc, char* argv[]) {
         variableList[i]["name"] = name;
     }
 
-    
-
-    // write variavle names + constraint outputs in module port list
+    // variable names and output x
     for (size_t i = 0; i < variableList.size(); ++i) {
-        outputFile << variableList[i]["name"].get<std::string>() << ", ";
-    }
-    for (size_t i = 0; i < constraintList.size(); ++i) {
-        outputFile << "constraint_" << i;
-        if (i != constraintList.size() - 1) {
+        outputFile << variableList[i]["name"].get<std::string>();
+        if (i != variableList.size() - 1) {
             outputFile << ", ";
         }
     }
+    outputFile << ", x";
     outputFile << ");" << std::endl;
 
     // write variable declarations
@@ -136,18 +132,30 @@ int main(int argc, char* argv[]) {
                    << variableList[i]["name"].get<std::string>() << ";" << std::endl;
     }
 
-    // write constraint outputs
-    for (size_t i = 0; i < constraintList.size(); ++i) {
-        outputFile << "    output wire constraint_" << i << ";" << std::endl;
+    // internal wire constraints
+    outputFile << "    wire constraint_0";
+    for (size_t i = 1; i < constraintList.size(); ++i) {
+        outputFile << ", constraint_" << i;
     }
+    outputFile << ";" << std::endl;
+    
+    // output
+    outputFile << "    output wire x;" << std::endl;
 
     outputFile << std::endl;
 
-    // assign constraints
     for (size_t i = 0; i < constraintList.size(); ++i) {
         std::string expr = generateExpression(constraintList[i], variableList);
         outputFile << "    assign constraint_" << i << " = |(" << expr << ");" << std::endl;
     }
+    
+    // x is the conjunction of all constraints
+    outputFile << "    assign x = constraint_0";
+    for (size_t i = 1; i < constraintList.size(); ++i) {
+        outputFile << " & constraint_" << i;
+    }
+    outputFile << ";" << std::endl;
+    
     outputFile << "endmodule" << std::endl;
 
     std::cout << "Verilog file has been created : ./run_dir/json2verilog.v" << std::endl;
