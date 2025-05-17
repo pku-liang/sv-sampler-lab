@@ -4,10 +4,43 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <sys/stat.h>
 
 using json = nlohmann::json;
 
-// recursively generate the expression string
+/**
+ * Check if directory exists
+ * @param path Path to check
+ * @return True if directory exists, false otherwise
+ */
+bool directoryExists(const std::string& path) {
+    struct stat info;
+    return stat(path.c_str(), &info) == 0 && (info.st_mode & S_IFDIR);
+}
+
+/**
+ * Create directory if it doesn't exist
+ * @param path Directory path to create
+ * @return True if directory exists or was created, false otherwise
+ */
+bool createDirectory(const std::string& path) {
+    if (directoryExists(path)) return true;
+    
+    #ifdef _WIN32
+    int result = mkdir(path.c_str());
+    #else
+    int result = mkdir(path.c_str(), 0755);
+    #endif
+    
+    return result == 0;
+}
+
+/**
+ * Recursively generate Verilog expression string from JSON constraint
+ * @param expression JSON expression object
+ * @param variableList List of variables
+ * @return Verilog expression string
+ */
 std::string generateExpression(const json& expression, const json& variableList) {
     std::string op = expression["op"];
     
@@ -71,24 +104,42 @@ std::string generateExpression(const json& expression, const json& variableList)
         return "(!(" + lhs + " != 0) || (" + rhs + " != 0))";
     }
 
-    // Other unsupported operations
+    // Handle unsupported operations
     std::cerr << "Warning: Unsupported operator '" << op << "'" << std::endl;
     return "";  
 }
 
-// get json_file from cmd and generate verilog file
+/**
+ * Main function: Parse JSON constraint file and generate Verilog module
+ * @param argc Argument count
+ * @param argv Argument values
+ * @return Exit status
+ */
 int main(int argc, char* argv[]) {
+    // Check command line arguments
     if (argc < 2) {
-        std::cerr << "syntax error. Try " << argv[0] << " <json_file>" << std:: endl;
+        std::cerr << "Usage: " << argv[0] << " <json_file> [output_dir]" << std::endl;
         return 1;
     }
 
     std::string inputFilePath = argv[1];
+    std::string outputDir = "./run_dir";  // Default output directory
+    
+    // Use custom output directory if provided
+    if (argc >= 3) {
+        outputDir = argv[2];
+    }
+    
+    // Ensure output directory exists
+    if (!createDirectory(outputDir)) {
+        std::cerr << "Error: Failed to create output directory: " << outputDir << std::endl;
+        return 1;
+    }
 
-    // open json file
+    // Open and parse JSON input file
     std::ifstream inputFile(inputFilePath);
     if (!inputFile.is_open()) {
-        std::cerr << "Unable to open:" << inputFilePath << std::endl;
+        std::cerr << "Error: Unable to open file: " << inputFilePath << std::endl;
         return 1;
     }
 
@@ -98,23 +149,25 @@ int main(int argc, char* argv[]) {
     auto& variableList = inputJson["variable_list"];
     const auto& constraintList = inputJson["constraint_list"];
 
-    // create output directory
-    std::ofstream outputFile("./run_dir/json2verilog.v");
+    // Create output file
+    std::string outputFilePath = outputDir + "/json2verilog.v";
+    std::ofstream outputFile(outputFilePath);
     if (!outputFile.is_open()) {
-        std::cerr << "Unable to create output file" << std::endl;
+        std::cerr << "Error: Unable to create output file: " << outputFilePath << std::endl;
         return 1;
     }
 
+    // Generate Verilog module header
     outputFile << "module generated_module(";
 
-    //remove the quotes from the variable names
+    // Remove quotes from variable names
     for (size_t i = 0; i < variableList.size(); ++i) {
         std::string name = variableList[i]["name"].get<std::string>();
         name.erase(std::remove(name.begin(), name.end(), '"'), name.end());
         variableList[i]["name"] = name;
     }
 
-    // variable names and output x
+    // Generate port list
     for (size_t i = 0; i < variableList.size(); ++i) {
         outputFile << variableList[i]["name"].get<std::string>();
         if (i != variableList.size() - 1) {
@@ -124,7 +177,7 @@ int main(int argc, char* argv[]) {
     outputFile << ", x";
     outputFile << ");" << std::endl;
 
-    // write variable declarations
+    // Generate input declarations
     for (size_t i = 0; i < variableList.size(); ++i) {
         outputFile << "    input "
                    << (variableList[i]["signed"] ? "signed " : "")
@@ -132,33 +185,33 @@ int main(int argc, char* argv[]) {
                    << variableList[i]["name"].get<std::string>() << ";" << std::endl;
     }
 
-    // internal wire constraints
+    // Generate internal constraint wires
     outputFile << "    wire constraint_0";
     for (size_t i = 1; i < constraintList.size(); ++i) {
         outputFile << ", constraint_" << i;
     }
     outputFile << ";" << std::endl;
     
-    // output
+    // Generate output declaration
     outputFile << "    output wire x;" << std::endl;
-
     outputFile << std::endl;
 
+    // Generate constraint assignments
     for (size_t i = 0; i < constraintList.size(); ++i) {
         std::string expr = generateExpression(constraintList[i], variableList);
         outputFile << "    assign constraint_" << i << " = |(" << expr << ");" << std::endl;
     }
     
-    // x is the conjunction of all constraints
+    // Generate overall constraint (AND of all individual constraints)
     outputFile << "    assign x = constraint_0";
     for (size_t i = 1; i < constraintList.size(); ++i) {
         outputFile << " & constraint_" << i;
     }
     outputFile << ";" << std::endl;
     
+    // End module
     outputFile << "endmodule" << std::endl;
 
-    std::cout << "Verilog file has been created : ./run_dir/json2verilog.v" << std::endl;
-
+    std::cout << "Verilog file generated: " << outputFilePath << std::endl;
     return 0;
 }

@@ -1,0 +1,20 @@
+
+yosys> read_verilog ./run_dir/json2verilog.v
+
+yosys> hierarchy -check
+
+yosys> opt
+
+yosys> proc
+
+yosys> techmap
+
+yosys> opt
+
+yosys> aigmap
+
+yosys> opt
+
+yosys> write_aiger -symbols -ascii ./run_dir/verilog2aag.aag
+
+yosys> exit
