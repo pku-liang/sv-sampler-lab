@@ -1,39 +1,174 @@
 {
-  "assignment_list": [
-    [
-      { "value": "0d2e" },
-      { "value": "0e3b" },
-      { "value": "3ef9" },
-      { "value": "3799" },
-      { "value": "5b" }
-    ],
-    [
-      { "value": "114e" },
-      { "value": "0881" },
-      { "value": "247e" },
-      { "value": "298a" },
-      { "value": "6c" }
-    ],
-    [
-      { "value": "1dbc" },
-      { "value": "14e0" },
-      { "value": "0e42" },
-      { "value": "20b6" },
-      { "value": "7c" }
-    ],
-    [
-      { "value": "0bc4" },
-      { "value": "0e9b" },
-      { "value": "1005" },
-      { "value": "3fe4" },
-      { "value": "09" }
-    ],
-    [
-      { "value": "056e" },
-      { "value": "167c" },
-      { "value": "0e49" },
-      { "value": "1c37" },
-      { "value": "f6" }
+    "assignment_list": [
+        [
+            {
+                "value": "0"
+            },
+            {
+                "value": "f9f"
+            },
+            {
+                "value": "f3e"
+            },
+            {
+                "value": "2281"
+            },
+            {
+                "value": "0"
+            }
+        ],
+        [
+            {
+                "value": "0"
+            },
+            {
+                "value": "c9"
+            },
+            {
+                "value": "228a"
+            },
+            {
+                "value": "3000"
+            },
+            {
+                "value": "0"
+            }
+        ],
+        [
+            {
+                "value": "0"
+            },
+            {
+                "value": "309"
+            },
+            {
+                "value": "52"
+            },
+            {
+                "value": "3520"
+            },
+            {
+                "value": "0"
+            }
+        ],
+        [
+            {
+                "value": "0"
+            },
+            {
+                "value": "1b59"
+            },
+            {
+                "value": "20f2"
+            },
+            {
+                "value": "3400"
+            },
+            {
+                "value": "0"
+            }
+        ],
+        [
+            {
+                "value": "0"
+            },
+            {
+                "value": "9f"
+            },
+            {
+                "value": "213e"
+            },
+            {
+                "value": "2010"
+            },
+            {
+                "value": "0"
+            }
+        ],
+        [
+            {
+                "value": "0"
+            },
+            {
+                "value": "ced"
+            },
+            {
+                "value": "1e1a"
+            },
+            {
+                "value": "2c00"
+            },
+            {
+                "value": "0"
+            }
+        ],
+        [
+            {
+                "value": "0"
+            },
+            {
+                "value": "931"
+            },
+            {
+                "value": "2a62"
+            },
+            {
+                "value": "2001"
+            },
+            {
+                "value": "0"
+            }
+        ],
+        [
+            {
+                "value": "0"
+            },
+            {
+                "value": "1fc9"
+            },
+            {
+                "value": "2e82"
+            },
+            {
+                "value": "3c58"
+            },
+            {
+                "value": "0"
+            }
+        ],
+        [
+            {
+                "value": "0"
+            },
+            {
+                "value": "4d"
+            },
+            {
+                "value": "912"
+            },
+            {
+                "value": "31b0"
+            },
+            {
+                "value": "0"
+            }
+        ],
+        [
+            {
+                "value": "0"
+            },
+            {
+                "value": "4f7"
+            },
+            {
+                "value": "1446"
+            },
+            {
+                "value": "3200"
+            },
+            {
+                "value": "0"
+            }
+        ]
     ]
-  ]
 }

@@ -92,5 +92,6 @@
         "stop_token": "cpp",
         "thread": "cpp",
         "variant": "cpp"
-    }
+    },
+    "cmake.ignoreCMakeListsMissing": true
 }
