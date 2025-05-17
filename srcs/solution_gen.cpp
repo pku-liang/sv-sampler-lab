@@ -140,11 +140,16 @@ class BDD_Solver {
                 int idx;
                 aag_file >> idx;
                 DdNode* node = Cudd_bddIthVar(manager, i);
+                Cudd_Ref(node);
                 nodes[idx / 2 - 1] = node;// aag input first index is 2
 
                 // store dp
                 dp[node] = {(__float128)0.0, (__float128)1.0}; // 0: odd_cnt, 1: even_cnt
+                dp[Cudd_Not(node)] = {(__float128)1.0, (__float128)0.0}; 
             }
+            // for constant node
+            dp[Cudd_ReadOne(manager)] = {(__float128)0.0, (__float128)1.0};
+            dp[Cudd_ReadLogicZero(manager)] = {(__float128)0.0, (__float128)0.0};
 
             // outputs(only 1 output)
             int output_idx;
@@ -154,23 +159,21 @@ class BDD_Solver {
             for(int i = 0 ; i < and_num ; i++){
                 int out, in1, in2;
                 aag_file >> out >> in1 >> in2;
-                DdNode *In1, *In2;
+                DdNode *In1, *In2, *Out;
 
                 if(in1 / 2 == 0){// constant
                      In1 = (in1 % 2 == 0) ? Cudd_ReadOne(manager) : Cudd_ReadLogicZero(manager);
                 } else{
                     In1 = (in1 % 2 == 0) ? nodes[in1 / 2 - 1] : Cudd_Not(nodes[in1 / 2 - 1]);
-                    Cudd_Ref(In1);
                 }
 
                 if(in2 / 2 == 0){// constant
                      In2 = (in2 % 2 == 0) ? Cudd_ReadOne(manager) : Cudd_ReadLogicZero(manager);
                 } else{
                     In2 = (in2 % 2 == 0) ? nodes[in2 / 2 - 1] : Cudd_Not(nodes[in2 / 2 - 1]);
-                    Cudd_Ref(In2);
                 }
 
-                DdNode *Out = Cudd_bddAnd(manager, In1, In2);
+                Out = Cudd_bddAnd(manager, In1, In2);
                 Cudd_Ref(Out);
                 nodes[out / 2 - 1] = Out;
             }
@@ -188,7 +191,8 @@ class BDD_Solver {
                 regex p2("^var_(\\d+)\\[(\\d+)\\]$");
 
                 int idx = 0, x = 0, y = 0;
-                    smatch match;
+                smatch match;
+
                 // i_idx
                 if (regex_match(head, match, p1)) {
                    idx = stoi(match[1]);
@@ -201,16 +205,15 @@ class BDD_Solver {
                     ori_input_num = max(ori_input_num, x + 1);
                 }
 
-                if (idx < idx_to_name.size()) {
-                    idx_to_name[idx] = {x, y};
-                }
+                idx_to_name[idx] = {x, y};
             }
 
-            ori_input_num = max(ori_input_num, 1);
-            idx_to_len.resize(ori_input_num, 0);
+            // for solution reshape in the last step
+            ori_input_num = max(ori_input_num, 1);// original input number 
+            idx_to_len.resize(ori_input_num, 0);// index to the length of each original input variable
             
             // calculate the length of each original input variable
-            for (int i = 0; i < input_num && i < idx_to_name.size(); i++) {
+            for (size_t i = 0; i < idx_to_name.size(); i++) {
                 int x = idx_to_name[i].first;
                 int y = idx_to_name[i].second;
                 if (x < ori_input_num) {
@@ -231,45 +234,113 @@ class BDD_Solver {
             fclose(dot_file);
             return 0;
         }
-
         pair<__float128, __float128> cal_dp(DdNode* node) {
-            if (dp.find(node) != dp.end()) {
-                return dp[node];
-            }
-            
-            // leaves
+            // 处理常量节点
             if (Cudd_IsConstant(node)) {
-                if (node == Cudd_ReadOne(manager)) { 
-                    return dp[node] = {(__float128)0.0, (__float128)1.0};
+                if (node == Cudd_ReadOne(manager)) {
+                    return {(__float128)0.0, (__float128)1.0}; // 无奇边路径，1条偶边路径
                 } else {
-                    return dp[node] = {(__float128)0.0, (__float128)0.0}; 
+                    return {(__float128)0.0, (__float128)0.0}; // 无路径
                 }
             }
 
-            // node without complementation
-            DdNode* regular_node = Cudd_Regular(node);
-            bool is_complemented = (regular_node != node);
-            
-            DdNode* T = Cudd_T(regular_node);
-            DdNode* E = Cudd_E(regular_node);
-            
-            if (is_complemented) {
-                T = Cudd_NotCond(T, 1);
-                E = Cudd_NotCond(E, 1);
+            // 先检查缓存
+            auto it = dp.find(node);
+            if (it != dp.end()) {
+                return it->second;
             }
             
-            pair<__float128, __float128> t_paths = cal_dp(T);
-            pair<__float128, __float128> e_paths = cal_dp(E);
+            int idx = Cudd_NodeReadIndex(node);
+            cout << "Node "<< idx << " not found in dp, calculating..." << endl;
+
+            // 获取节点正则形式和子节点
+            DdNode* regular_node = Cudd_Regular(node);
+            DdNode* T = Cudd_T(regular_node);
+            DdNode* E = Cudd_E(regular_node);
+
+            // 检查当前节点是否有补边
+            bool node_complemented = Cudd_IsComplement(node);
             
+            // 递归计算子节点路径数
+            pair<__float128, __float128> t_paths, e_paths;
+            
+            // 如果当前节点的正则形式与原节点不同，表示有补边
+            if (node_complemented) {
+                // 应用补边到子节点（反转补边状态）
+                T = Cudd_Not(T);
+                E = Cudd_Not(E);
+            }
+            
+            // 计算子节点路径数
+            t_paths = cal_dp(T);
+            e_paths = cal_dp(E);
+            
+            // 计算结果
             pair<__float128, __float128> result;
             
-            result.first = t_paths.first + e_paths.first;   // odd
-            result.second = t_paths.second + e_paths.second; // even
+            // 关键修改：合并子节点的路径数并考虑补边效果
+            // 对于当前节点到终端节点的路径：
+            // 1. 奇数路径 = Then子节点的奇数路径 + Else子节点的奇数路径
+            // 2. 偶数路径 = Then子节点的偶数路径 + Else子节点的偶数路径
+            result.first = t_paths.first + e_paths.first;   // 奇数路径数
+            result.second = t_paths.second + e_paths.second; // 偶数路径数
             
+            // 如果当前节点有补边，则奇偶路径数互换
+            // 因为补边会改变路径中的奇偶性
+            if (node_complemented) {
+                swap(result.first, result.second);
+            }
+            
+            char odd_buf[128], even_buf[128];
+            quadmath_snprintf(odd_buf, sizeof(odd_buf), "%.6Qg", result.first);
+            quadmath_snprintf(even_buf, sizeof(even_buf), "%.6Qg", result.second);
+            cout << "Calculating DP for node: " << idx;
+            cout << " Odd paths: " << odd_buf << ", Even paths: " << even_buf << endl;
+            
+            // 缓存并返回结果
             dp[node] = result;
             return result;
         }
+        /*pair<__float128, __float128> cal_dp(DdNode* node) {
+            int idx = Cudd_NodeReadIndex(node);
 
+            // check if already calculated
+            auto it = dp.find(node);
+            if (it != dp.end()) {
+                return it->second;
+            }
+            else{
+                cout << "Node "<< idx << " not found in dp, calculating..." << endl;
+            }
+
+            DdNode* regular_node = Cudd_Regular(node);
+            DdNode* T = Cudd_T(regular_node);
+            DdNode* E = Cudd_E(regular_node);
+
+            if (Cudd_IsComplement(node)) {
+                T = Cudd_Not(T);
+                E = Cudd_Not(E);
+            }
+
+            pair<__float128, __float128> t_paths = cal_dp(T);
+            pair<__float128, __float128> e_paths = cal_dp(E);
+
+            pair<__float128, __float128> result;// 0: odd_cnt, 1: even_cnt
+            result.first = Cudd_IsComplement(node) ? t_paths.second + e_paths.second : t_paths.first + e_paths.first;
+            result.second = Cudd_IsComplement(node) ? t_paths.first + e_paths.first : t_paths.second + e_paths.second;
+
+            // for debug
+            char odd_buf[128], even_buf[128];
+            quadmath_snprintf(odd_buf, sizeof(odd_buf), "%.6Qg", result.first);
+            quadmath_snprintf(even_buf, sizeof(even_buf), "%.6Qg", result.second);
+            cout << "Calculating DP for node: " << idx;
+            cout << " Odd paths: " << odd_buf << ", Even paths: " << even_buf << endl;
+
+            dp[node] = result;
+            return result;
+        }*/
+
+        /*
         bool dfs_generate_solution(DdNode* node, bool odd, vector<bool>& solution) {
             if (Cudd_IsConstant(node)) {
                 // check if find a solution
@@ -301,13 +372,6 @@ class BDD_Solver {
             double prob = 0.5;
             prob = static_cast<double>(cnt_T) / static_cast<double>(cnt_T + cnt_E);
             double rand = std::uniform_real_distribution<double>(0.0, 1.0)(rng);
-            
-            cout << "var_index: " << var_index 
-                << " cnt_T: " << static_cast<double>(cnt_T)
-                << " cnt_E: " << static_cast<double>(cnt_E)
-                << " prob: " << prob 
-                << " rand: " << rand 
-                << " choice: " << (rand < prob ? "T" : "E") << endl;
 
             bool success = false;
             if (rand < prob) {
@@ -316,6 +380,54 @@ class BDD_Solver {
             } else {
                 solution[var_index] = false;
                 success = dfs_generate_solution(E, odd_E, solution);
+            }
+
+            return success;
+        }*/
+        bool dfs_generate_solution(DdNode* node, bool odd, vector<bool>& solution) {
+            if (Cudd_IsConstant(node)) {
+                if ((odd && node == Cudd_ReadOne(manager)) || 
+                    (!odd && node != Cudd_ReadOne(manager))) {
+                    return true; 
+                }
+                return false; 
+            }
+
+            int var_index = Cudd_NodeReadIndex(node);
+            DdNode* regular_node = Cudd_Regular(node);
+            bool is_complemented = Cudd_IsComplement(node);
+
+            DdNode* T = Cudd_T(regular_node);
+            DdNode* E = Cudd_E(regular_node);
+
+            // 如果当前节点有补边，调整子节点的补边
+            if (is_complemented) {
+                T = Cudd_Not(T);
+                E = Cudd_Not(E);
+                // 节点有补边时奇偶性也翻转
+                odd = !odd;
+            }
+
+            // 计算子路径数量
+            // 注意：使用查询dp的方式要与存储一致
+            auto t_result = dp[T];
+            auto e_result = dp[E];
+
+            __float128 cnt_T = odd ? t_result.first : t_result.second;
+            __float128 cnt_E = odd ? e_result.first : e_result.second;
+
+            // 总路径数和选择概率
+            __float128 total_cnt = cnt_T + cnt_E;
+            double prob = (total_cnt > 0) ? static_cast<double>(cnt_T) / static_cast<double>(total_cnt) : 0.5;
+            double rand_val = std::uniform_real_distribution<double>(0.0, 1.0)(rng);
+
+            bool success = false;
+            if (rand_val < prob) {
+                solution[var_index] = true;
+                success = dfs_generate_solution(T, odd, solution);
+            } else {
+                solution[var_index] = false;
+                success = dfs_generate_solution(E, odd, solution);
             }
 
             return success;
@@ -331,7 +443,7 @@ class BDD_Solver {
 
             cal_dp(out_node);
             
-            const int MAX_ATTEMPTS = 1000;
+            const int MAX_ATTEMPTS = 100;
             
             for(int i = 0; i < num_solutions; i++) {
                 int attempts = 0;
@@ -422,10 +534,8 @@ class BDD_Solver {
                 
                 // sort by the original input variable order
                 for (int var_id = 0; var_id < ori_input_num; var_id++) {
-                    if (var_id < solution.size()) {
-                        string hex_value = binary_to_hex(solution[var_id]);
-                        j_solution.push_back({{"value", hex_value}});
-                    }
+                    string hex_value = binary_to_hex(solution[var_id]);
+                    j_solution.push_back({{"value", hex_value}});
                 }
                 
                 j["assignment_list"].push_back(j_solution);

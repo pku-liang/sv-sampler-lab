@@ -2,33 +2,16 @@
     "assignment_list": [
         [
             {
-                "value": "1"
-            },
-            {
                 "value": "0"
             },
             {
-                "value": "0"
+                "value": "f9f"
             },
             {
-                "value": "0"
+                "value": "f3e"
             },
             {
-                "value": "0"
-            }
-        ],
-        [
-            {
-                "value": "1"
-            },
-            {
-                "value": "0"
-            },
-            {
-                "value": "0"
-            },
-            {
-                "value": "0"
+                "value": "2281"
             },
             {
                 "value": "0"
@@ -36,33 +19,16 @@
         ],
         [
             {
-                "value": "1"
-            },
-            {
                 "value": "0"
             },
             {
-                "value": "0"
+                "value": "c9"
             },
             {
-                "value": "0"
+                "value": "228a"
             },
             {
-                "value": "0"
-            }
-        ],
-        [
-            {
-                "value": "1"
-            },
-            {
-                "value": "0"
-            },
-            {
-                "value": "0"
-            },
-            {
-                "value": "0"
+                "value": "3000"
             },
             {
                 "value": "0"
@@ -70,33 +36,16 @@
         ],
         [
             {
-                "value": "1"
-            },
-            {
                 "value": "0"
             },
             {
-                "value": "0"
+                "value": "309"
             },
             {
-                "value": "0"
+                "value": "52"
             },
             {
-                "value": "0"
-            }
-        ],
-        [
-            {
-                "value": "1"
-            },
-            {
-                "value": "0"
-            },
-            {
-                "value": "0"
-            },
-            {
-                "value": "0"
+                "value": "3520"
             },
             {
                 "value": "0"
@@ -104,33 +53,16 @@
         ],
         [
             {
-                "value": "1"
-            },
-            {
                 "value": "0"
             },
             {
-                "value": "0"
+                "value": "1b59"
             },
             {
-                "value": "0"
+                "value": "20f2"
             },
             {
-                "value": "0"
-            }
-        ],
-        [
-            {
-                "value": "1"
-            },
-            {
-                "value": "0"
-            },
-            {
-                "value": "0"
-            },
-            {
-                "value": "0"
+                "value": "3400"
             },
             {
                 "value": "0"
@@ -138,16 +70,16 @@
         ],
         [
             {
-                "value": "1"
-            },
-            {
                 "value": "0"
             },
             {
-                "value": "0"
+                "value": "9f"
             },
             {
-                "value": "0"
+                "value": "213e"
+            },
+            {
+                "value": "2010"
             },
             {
                 "value": "0"
@@ -155,16 +87,84 @@
         ],
         [
             {
-                "value": "1"
+                "value": "0"
             },
+            {
+                "value": "ced"
+            },
+            {
+                "value": "1e1a"
+            },
+            {
+                "value": "2c00"
+            },
+            {
+                "value": "0"
+            }
+        ],
+        [
             {
                 "value": "0"
             },
             {
-                "value": "0"
+                "value": "931"
+            },
+            {
+                "value": "2a62"
+            },
+            {
+                "value": "2001"
             },
             {
                 "value": "0"
+            }
+        ],
+        [
+            {
+                "value": "0"
+            },
+            {
+                "value": "1fc9"
+            },
+            {
+                "value": "2e82"
+            },
+            {
+                "value": "3c58"
+            },
+            {
+                "value": "0"
+            }
+        ],
+        [
+            {
+                "value": "0"
+            },
+            {
+                "value": "4d"
+            },
+            {
+                "value": "912"
+            },
+            {
+                "value": "31b0"
+            },
+            {
+                "value": "0"
+            }
+        ],
+        [
+            {
+                "value": "0"
+            },
+            {
+                "value": "4f7"
+            },
+            {
+                "value": "1446"
+            },
+            {
+                "value": "3200"
             },
             {
                 "value": "0"
