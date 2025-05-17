@@ -1,10 +1,11 @@
 module full_adder(
-    input a,
-    input b,
-    input cin,
+    input var_0,
+    input var_1,
+    input var_2,
     output sum,
     output cout
 );
-    assign sum  = a ^ b ^ cin;
-    assign cout = (a & b) | (b & cin) | (a & cin);
+    assign sum  = |(var_0 ^ var_1 ^ var_2);
+    assign cout = |((var_0 & var_1) | (var_1 & var_2) | (var_0 & var_2));
+    assign mpj = sum & cout;
 endmodule

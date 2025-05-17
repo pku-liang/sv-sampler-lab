@@ -3,27 +3,17 @@
     [
       { "value": "0"},
       { "value": "0"},
-      { "value": "8"}
-    ],
-    [
-      { "value": "0"},
-      { "value": "8"},
-      { "value": "8"}
-    ],
-    [
-      { "value": "0"},
-      { "value": "8"},
       { "value": "0"}
     ],
     [
-      { "value": "8"},
       { "value": "0"},
+      { "value": "8"},
       { "value": "8"}
     ],
     [
-      { "value": "8"},
       { "value": "0"},
-      { "value": "0"}
+      { "value": "0"},
+      { "value": "8"}
     ]
   ]
 }
