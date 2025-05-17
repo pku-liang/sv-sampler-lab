@@ -126,10 +126,10 @@ public:
             // 输入 1
             DdNode *In1 = nullptr;
             if (in1 == 0) {
-                In1 = Cudd_ReadLogicZero(manager); // AAG索引0表示常数FALSE
+                In1 = Cudd_ReadOne(manager); // AIG 0 -> BDD 1
                 Cudd_Ref(In1);
             } else if (in1 == 1) {
-                In1 = Cudd_ReadOne(manager); // AAG索引1表示常数TRUE
+                In1 = Cudd_ReadLogicZero(manager); // AIG 1 -> BDD 0
                 Cudd_Ref(In1);
             } else {
                 DdNode* base_node = nodes[in1 >> 1];
@@ -183,10 +183,10 @@ public:
             int out_idx = output_idxs[i];
             DdNode *out_node = nullptr;
             
-            if (out_idx == 0) {
-                out_node = Cudd_ReadLogicZero(manager); // AAG索引0表示常数FALSE
-            } else if (out_idx == 1) {
-                out_node = Cudd_ReadOne(manager); // AAG索引1表示常数TRUE
+            if (out_idx == 1) {
+                out_node = Cudd_ReadOne(manager); // AIG 0 -> BDD 1
+            } else if (out_idx == 0) {
+                out_node = Cudd_ReadLogicZero(manager); // AIG 1 -> BDD 0
             } else {
                 DdNode* base_node = nodes[out_idx >> 1];
                 if (base_node == nullptr) {
