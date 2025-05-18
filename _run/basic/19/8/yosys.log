@@ -1,0 +1,12 @@
+
+yosys> read_verilog _run/basic/19/8/json2verilog.v
+
+yosys> hierarchy -check
+
+yosys> opt
+
+yosys> proc
+
+yosys> techmap
+
+yosys> opt
