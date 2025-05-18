@@ -129,3 +129,26 @@ git submodule update --init
   - `yosys -q -p "read_verilog cnstr.sv; synth; aigmap; writer_aiger cnstr.aig;"` 可以在非交互式情况下执行一串指令（`-q`会阻止额外信息被打印，如果想看到细节可以去掉 `-q`）
 - [AIG格式描述](https://github.com/arminbiere/aiger/blob/master/FORMAT)
 - [nlohmann::json文档](https://github.com/nlohmann/json?tab=readme-ov-file#read-json-from-a-file)
+
+## 环境配置
+助教已经帮你们把所有的需要依赖的第三方库的源代码clone到服务器的sv-sampler-lab目录下了，无需手动clone。下面是编译安装第三方库的具体方法：
+### Yosys
+请确保当前工作目录为sv-sampler-lab目录，然后执行以下命令
+```
+cd yosys
+make
+sudo make install
+```
+之后运行`make test`检验是否成功安装
+
+### CUDD
+请确保当前工作目录为sv-sampler-lab目录，然后执行以下命令
+```
+cd cudd
+./configure
+make
+```
+之后运行`make check`检验是否成功安装
+
+### Json
+无需编译，直接include `nlohmann/json.hpp`即可
