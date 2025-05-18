@@ -137,9 +137,9 @@ git submodule update --init
 ```
 cd yosys
 make
-sudo make install
+make install
 ```
-之后运行`make test`检验是否成功安装
+之后运行`make test`检验是否成功安装（如果提示iverilog not found，属于正常情况，只要可以将verilog综合成aig就行）
 
 ### CUDD
 请确保当前工作目录为sv-sampler-lab目录，然后执行以下命令
