@@ -126,7 +126,7 @@ git submodule update --init
   - `aigmap` 将电路映射为AIG网表
   - `write_aiger` 输出AIG网表
   - 运行 `yosys` 进入交互式命令行中，可以执行 `help [cmd]` 打印关于 `[cmd]` 的使用方法
-  - `yosys -q -p "read_verilog cnstr.sv; synth; aigmap; writer_aiger cnstr.aig;"` 可以在非交互式情况下执行一串指令（`-q`会阻止额外信息被打印，如果想看到细节可以去掉 `-q`）
+  - `yosys -q -p "read_verilog cnstr.sv; synth; aigmap; write_aiger cnstr.aig;"` 可以在非交互式情况下执行一串指令（`-q`会阻止额外信息被打印，如果想看到细节可以去掉 `-q`）
 - [AIG格式描述](https://github.com/arminbiere/aiger/blob/master/FORMAT)
 - [nlohmann::json文档](https://github.com/nlohmann/json?tab=readme-ov-file#read-json-from-a-file)
 
