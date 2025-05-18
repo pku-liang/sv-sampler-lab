@@ -145,6 +145,7 @@ make install
 请确保当前工作目录为sv-sampler-lab目录，然后执行以下命令
 ```
 cd cudd
+autoreconf
 ./configure
 make
 ```
