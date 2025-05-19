@@ -1,0 +1,3 @@
+./run.sh: line 52: 70454 Done                    echo "$YOSYS_SCRIPT"
+     70455 Killed                  | ./yosys/yosys -q > "$run_dir/yosys.log" 2>&1
+-1

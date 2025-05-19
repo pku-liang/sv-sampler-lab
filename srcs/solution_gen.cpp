@@ -93,6 +93,7 @@ class BDD_Solver {
                 cerr << "Error: Failed to initialize CUDD manager" << endl;
                 throw runtime_error("CUDD initialization failed");
             }
+            Cudd_AutodynEnable(manager, CUDD_REORDER_SIFT);
             
             max_idx = 0;
             input_num = 0;
@@ -234,17 +235,9 @@ class BDD_Solver {
             fclose(dot_file);
             return 0;
         }
-        pair<__float128, __float128> cal_dp(DdNode* node) {
-            // 处理常量节点
-            if (Cudd_IsConstant(node)) {
-                if (node == Cudd_ReadOne(manager)) {
-                    return {(__float128)0.0, (__float128)1.0}; // 无奇边路径，1条偶边路径
-                } else {
-                    return {(__float128)0.0, (__float128)0.0}; // 无路径
-                }
-            }
 
-            // 先检查缓存
+        pair<__float128, __float128> cal_dp(DdNode* node) {
+
             auto it = dp.find(node);
             if (it != dp.end()) {
                 return it->second;
@@ -253,40 +246,28 @@ class BDD_Solver {
             int idx = Cudd_NodeReadIndex(node);
             cout << "Node "<< idx << " not found in dp, calculating..." << endl;
 
-            // 获取节点正则形式和子节点
             DdNode* regular_node = Cudd_Regular(node);
             DdNode* T = Cudd_T(regular_node);
             DdNode* E = Cudd_E(regular_node);
 
-            // 检查当前节点是否有补边
             bool node_complemented = Cudd_IsComplement(node);
             
-            // 递归计算子节点路径数
             pair<__float128, __float128> t_paths, e_paths;
             
-            // 如果当前节点的正则形式与原节点不同，表示有补边
             if (node_complemented) {
-                // 应用补边到子节点（反转补边状态）
                 T = Cudd_Not(T);
                 E = Cudd_Not(E);
             }
             
-            // 计算子节点路径数
             t_paths = cal_dp(T);
             e_paths = cal_dp(E);
             
-            // 计算结果
             pair<__float128, __float128> result;
             
-            // 关键修改：合并子节点的路径数并考虑补边效果
-            // 对于当前节点到终端节点的路径：
-            // 1. 奇数路径 = Then子节点的奇数路径 + Else子节点的奇数路径
-            // 2. 偶数路径 = Then子节点的偶数路径 + Else子节点的偶数路径
-            result.first = t_paths.first + e_paths.first;   // 奇数路径数
-            result.second = t_paths.second + e_paths.second; // 偶数路径数
+            result.first = t_paths.first + e_paths.first;   // odd
+            result.second = t_paths.second + e_paths.second; // even
             
-            // 如果当前节点有补边，则奇偶路径数互换
-            // 因为补边会改变路径中的奇偶性
+            // if complemented, swap the results
             if (node_complemented) {
                 swap(result.first, result.second);
             }
@@ -297,7 +278,6 @@ class BDD_Solver {
             cout << "Calculating DP for node: " << idx;
             cout << " Odd paths: " << odd_buf << ", Even paths: " << even_buf << endl;
             
-            // 缓存并返回结果
             dp[node] = result;
             return result;
         }
@@ -400,24 +380,19 @@ class BDD_Solver {
             DdNode* T = Cudd_T(regular_node);
             DdNode* E = Cudd_E(regular_node);
 
-            // 如果当前节点有补边，调整子节点的补边
             if (is_complemented) {
                 T = Cudd_Not(T);
                 E = Cudd_Not(E);
-                // 节点有补边时奇偶性也翻转
                 odd = !odd;
             }
 
-            // 计算子路径数量
-            // 注意：使用查询dp的方式要与存储一致
             auto t_result = dp[T];
             auto e_result = dp[E];
 
             __float128 cnt_T = odd ? t_result.first : t_result.second;
             __float128 cnt_E = odd ? e_result.first : e_result.second;
-
-            // 总路径数和选择概率
             __float128 total_cnt = cnt_T + cnt_E;
+
             double prob = (total_cnt > 0) ? static_cast<double>(cnt_T) / static_cast<double>(total_cnt) : 0.5;
             double rand_val = std::uniform_real_distribution<double>(0.0, 1.0)(rng);
 
