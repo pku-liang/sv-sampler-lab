@@ -93,7 +93,7 @@ class BDD_Solver {
                 cerr << "Error: Failed to initialize CUDD manager" << endl;
                 throw runtime_error("CUDD initialization failed");
             }
-            Cudd_AutodynEnable(manager, CUDD_REORDER_SIFT);
+
             
             max_idx = 0;
             input_num = 0;
@@ -133,6 +133,9 @@ class BDD_Solver {
             aag_file >> max_idx >> input_num >> latch_num >> output_num >> and_num;
             
             // initialize 
+            if(input_num < 100){// in case that the BDD is too small to generate randomly different solutions
+                Cudd_AutodynEnable(manager, CUDD_REORDER_SIFT);
+            }
             nodes.resize(max_idx);
             idx_to_name.resize(input_num);
 
