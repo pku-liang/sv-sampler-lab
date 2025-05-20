@@ -29,15 +29,15 @@ Peak number of live nodes: 113362
 Number of BDD variables: 368
 Number of ZDD variables: 0
 Number of cache entries: 262144
-Number of cache look-ups: 425127
-Number of cache hits: 204554
-Number of cache insertions: 221202
-Number of cache collisions: 13128
-Number of cache deletions: 195891
-Cache used slots = 56.96% (expected 4.66%)
+Number of cache look-ups: 425293
+Number of cache hits: 204684
+Number of cache insertions: 221238
+Number of cache collisions: 13367
+Number of cache deletions: 195795
+Cache used slots = 56.84% (expected 4.67%)
 Soft limit for cache size: 474112
 Number of buckets in unique table: 118528
-Used buckets in unique table: 34.12% (expected 34.29%)
+Used buckets in unique table: 34.15% (expected 34.29%)
 Number of BDD and ADD nodes: 76159
 Number of ZDD nodes: 0
 Number of dead BDD and ADD nodes: 574
@@ -47,7 +47,7 @@ Total number of nodes reclaimed: 11832
 Garbage collections so far: 10
 Time for garbage collection: 0.00 sec
 Reorderings so far: 11
-Time for reordering: 7.05 sec
+Time for reordering: 7.38 sec
 Node 367 not found in dp, calculating...
 Node 366 not found in dp, calculating...
 Node 365 not found in dp, calculating...
