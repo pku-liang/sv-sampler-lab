@@ -41,7 +41,7 @@ bool createDirectory(const std::string& path) {
  * @param variableList List of variables
  * @return Verilog expression string
  */
-std::string generateExpression(const json& expression, const json& variableList) {
+std::string generateExpression(const json& expression, const json& variableList, std::vector<std::string>& divisors) {
     std::string op = expression["op"];
     
     // Basic operands
@@ -54,53 +54,54 @@ std::string generateExpression(const json& expression, const json& variableList)
     
     // Unary operators
     else if (op == "LOG_NEG") {
-        return "(!(" + generateExpression(expression["lhs_expression"], variableList) + "))";
+        return "(!(" + generateExpression(expression["lhs_expression"], variableList, divisors) + "))";
     } else if (op == "BIT_NEG") {
-        return "(~(" + generateExpression(expression["lhs_expression"], variableList) + "))";
+        return "(~(" + generateExpression(expression["lhs_expression"], variableList, divisors) + "))";
     } else if (op == "MINUS") {
-        return "(-" + generateExpression(expression["lhs_expression"], variableList) + ")";
+        return "(-" + generateExpression(expression["lhs_expression"], variableList, divisors) + ")";
     }
     
     // Binary operators
     else if (op == "ADD") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " + " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " + " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "SUB") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " - " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " - " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "MUL") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " * " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " * " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "DIV") {
-        std::string divisor = generateExpression(expression["rhs_expression"], variableList);
-        return "(" + divisor + " == 0 ? 0 : " + generateExpression(expression["lhs_expression"], variableList) + " / " + divisor + ")";
+        std::string divisor = generateExpression(expression["rhs_expression"], variableList, divisors);
+        divisors.push_back(divisor);
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " / " + divisor + ")";
     } else if (op == "LOG_AND") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " && " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " && " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "LOG_OR") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " || " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " || " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "EQ") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " == " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " == " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "NEQ") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " != " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " != " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "LT") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " < " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " < " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "LTE") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " <= " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " <= " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "GT") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " > " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " > " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "GTE") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " >= " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " >= " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "BIT_AND") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " & " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " & " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "BIT_OR") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " | " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " | " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "BIT_XOR") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " ^ " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " ^ " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "RSHIFT") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " >> " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " >> " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "LSHIFT") {
-        return "(" + generateExpression(expression["lhs_expression"], variableList) + " << " + generateExpression(expression["rhs_expression"], variableList) + ")";
+        return "(" + generateExpression(expression["lhs_expression"], variableList, divisors) + " << " + generateExpression(expression["rhs_expression"], variableList, divisors) + ")";
     } else if (op == "IMPLY") {
         // For multi-bit, (lhs != 0) -> (rhs != 0)
-        std::string lhs = generateExpression(expression["lhs_expression"], variableList);
-        std::string rhs = generateExpression(expression["rhs_expression"], variableList);
+        std::string lhs = generateExpression(expression["lhs_expression"], variableList, divisors);
+        std::string rhs = generateExpression(expression["rhs_expression"], variableList, divisors);
         return "(!(" + lhs + " != 0) || (" + rhs + " != 0))";
     }
 
@@ -196,15 +197,28 @@ int main(int argc, char* argv[]) {
     outputFile << "    output wire x;" << std::endl;
     outputFile << std::endl;
 
+    // for division
+    std::vector<std::string> divisors;
+
     // Generate constraint assignments
     for (size_t i = 0; i < constraintList.size(); ++i) {
-        std::string expr = generateExpression(constraintList[i], variableList);
+        std::string expr = generateExpression(constraintList[i], variableList, divisors);
         outputFile << "    assign constraint_" << i << " = |(" << expr << ");" << std::endl;
+    }
+
+    // Generate divisor assignments
+    outputFile << "    wire constraint_" << constraintList.size();
+    for (size_t i = constraintList.size() + 1; i < constraintList.size() + divisors.size(); ++i) {
+        outputFile << ", constraint_" << i;
+    }
+    outputFile << ";" << std::endl;
+    for (size_t i = 0; i < divisors.size(); ++i) {
+        outputFile << "    assign constraint_" << constraintList.size() + i << " = |(" << divisors[i] << ");" << std::endl;
     }
     
     // Generate overall constraint (AND of all individual constraints)
     outputFile << "    assign x = constraint_0";
-    for (size_t i = 1; i < constraintList.size(); ++i) {
+    for (size_t i = 1; i < constraintList.size() + divisors.size(); ++i) {
         outputFile << " & constraint_" << i;
     }
     outputFile << ";" << std::endl;

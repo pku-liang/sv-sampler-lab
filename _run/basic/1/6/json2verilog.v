@@ -39,7 +39,7 @@ module generated_module(var_0, var_1, var_2, var_3, var_4, var_5, var_6, var_7, 
 
     assign constraint_0 = |((~(((~(var_13)) * var_6))));
     assign constraint_1 = |((var_10 != 16'h1a2));
-    assign constraint_2 = |(((8'h5 == 0 ? 0 : var_3 / 8'h5) - var_21));
+    assign constraint_2 = |(((var_3 / 8'h5) - var_21));
     assign constraint_3 = |((var_31 | 8'h68));
     assign constraint_4 = |(((~(var_22)) | var_21));
     assign constraint_5 = |((var_11 ^ var_3));
@@ -72,5 +72,7 @@ module generated_module(var_0, var_1, var_2, var_3, var_4, var_5, var_6, var_7, 
     assign constraint_32 = |(((!(var_13)) * var_31));
     assign constraint_33 = |(((!(var_33 != 0) || (var_6 != 0)) + var_34));
     assign constraint_34 = |((!(((~(var_1)) >> 13'h2))));
-    assign x = constraint_0 & constraint_1 & constraint_2 & constraint_3 & constraint_4 & constraint_5 & constraint_6 & constraint_7 & constraint_8 & constraint_9 & constraint_10 & constraint_11 & constraint_12 & constraint_13 & constraint_14 & constraint_15 & constraint_16 & constraint_17 & constraint_18 & constraint_19 & constraint_20 & constraint_21 & constraint_22 & constraint_23 & constraint_24 & constraint_25 & constraint_26 & constraint_27 & constraint_28 & constraint_29 & constraint_30 & constraint_31 & constraint_32 & constraint_33 & constraint_34;
+    wire constraint_35;
+    assign constraint_35 = |(8'h5);
+    assign x = constraint_0 & constraint_1 & constraint_2 & constraint_3 & constraint_4 & constraint_5 & constraint_6 & constraint_7 & constraint_8 & constraint_9 & constraint_10 & constraint_11 & constraint_12 & constraint_13 & constraint_14 & constraint_15 & constraint_16 & constraint_17 & constraint_18 & constraint_19 & constraint_20 & constraint_21 & constraint_22 & constraint_23 & constraint_24 & constraint_25 & constraint_26 & constraint_27 & constraint_28 & constraint_29 & constraint_30 & constraint_31 & constraint_32 & constraint_33 & constraint_34 & constraint_35;
 endmodule
