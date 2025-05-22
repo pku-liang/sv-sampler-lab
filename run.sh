@@ -39,7 +39,7 @@ if [ ! -f "_run/json2verilog" ] || [ ! -f "_run/solution_gen" ]; then
     fi
     build_end_time=$(date +%s)
     build_runtime=$((build_end_time - build_start_time))
-    echo "✔ 编译成功: 可执行文件已生成 (用时: ${build_runtime}秒)"
+    echo "✔ 编译成功: 可执行文件已生成"
 else
     echo "✔ 使用已有的可执行文件"
     build_runtime=0
@@ -64,7 +64,7 @@ fi
 # 记录JSON到Verilog转换结束时间
 json2v_end_time=$(date +%s)
 json2v_runtime=$((json2v_end_time - json2v_start_time))
-echo "✔ Verilog 文件已生成: $run_dir/json2verilog.v (用时: ${json2v_runtime}秒)"
+echo "✔ Verilog 文件已生成: $run_dir/json2verilog.v"
 
 echo "===== Step 2: Verilog → AAG ====="
 # 记录Verilog到AAG转换开始时间
@@ -92,7 +92,7 @@ fi
 # 记录Verilog到AAG转换结束时间
 v2aag_end_time=$(date +%s)
 v2aag_runtime=$((v2aag_end_time - v2aag_start_time))
-echo "✔ AAG 文件已生成: $run_dir/verilog2aag.aag (用时: ${v2aag_runtime}秒)"
+echo "✔ AAG 文件已生成: $run_dir/verilog2aag.aag"
 
 echo "===== Step 3: 运行 BDD 求解器 ====="
 # 复制solution_gen到run_dir（可选，如果希望保留在运行目录中）
@@ -131,7 +131,7 @@ total_runtime=$((total_end_time - total_start_time))
     echo "Verilog到AAG转换时间: $v2aag_runtime 秒"
     echo "BDD求解时间: $bdd_runtime 秒"
     echo "总运行时间: $total_runtime 秒"
-} > "$run_dir/runtime.txt"
+} > "$run_dir/time_log.txt"
 
 # 检查结果文件是否存在
 if [ ! -f "$OUTPUT" ]; then
@@ -139,7 +139,7 @@ if [ ! -f "$OUTPUT" ]; then
     exit 1
 fi
 
-echo "✔ 解已生成: $OUTPUT (BDD求解用时: ${bdd_runtime}秒, 总用时: ${total_runtime}秒)"
+echo "✔ 解已生成: $OUTPUT"
 echo "处理完成: $dataset_name/$data_id.json (种子: $seed)"
 
 exit 0
