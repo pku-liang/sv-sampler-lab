@@ -25,12 +25,26 @@ basename=$(basename "$constraint_file" .json)
 
 echo "===== 处理 $dataset_name/$data_id.json 到 $run_dir ====="
 
-echo "===== Step 1: 编译 json2verilog ====="
-g++ -std=c++11 -I./include -o "$run_dir/json2verilog" ./srcs/json2verilog.cpp
-echo "✔ json2verilog 编译成功"
+# 检查预编译的可执行文件是否存在，如果不存在则运行 build.sh
+if [ ! -f "_run/json2verilog" ] || [ ! -f "_run/solution_gen" ]; then
+    echo "===== 可执行文件不存在，运行 build.sh 进行编译 ====="
+    ./build.sh
+    if [ $? -ne 0 ]; then
+        echo "❌ 编译失败: build.sh 执行出错"
+        exit 1
+    fi
+    echo "✔ 编译成功: 可执行文件已生成"
+else
+    echo "✔ 使用已有的可执行文件"
+fi
 
-echo "===== Step 2: JSON → Verilog ====="
-"$run_dir/json2verilog" "$constraint_file" "$run_dir"
+echo "===== Step 1: JSON → Verilog ====="
+# 复制json2verilog到run_dir（可选，如果希望保留在运行目录中）
+cp "_run/json2verilog" "$run_dir/json2verilog"
+
+# 执行转换
+"_run/json2verilog" "$constraint_file" "$run_dir"
+
 # 确保 json2verilog.v 生成到正确目录
 if [ ! -f "$run_dir/json2verilog.v" ]; then
     echo "❌ 错误: Verilog 文件未生成"
@@ -38,7 +52,7 @@ if [ ! -f "$run_dir/json2verilog.v" ]; then
 fi
 echo "✔ Verilog 文件已生成: $run_dir/json2verilog.v"
 
-echo "===== Step 3: Verilog → AAG ====="
+echo "===== Step 2: Verilog → AAG ====="
 YOSYS_SCRIPT="read_verilog $run_dir/json2verilog.v
 hierarchy -check
 opt
@@ -59,48 +73,22 @@ if [ ! -f "$run_dir/verilog2aag.aag" ]; then
 fi
 echo "✔ AAG 文件已生成: $run_dir/verilog2aag.aag"
 
-echo "===== Step 4: 编译并运行 BDD 求解器 ====="
-# C++编译相关设置
-SRC_DIR="./srcs"
-INCLUDE_DIR="./include"
-CUDD_DIR="./cudd"
-CUDD_LIB="$CUDD_DIR/cudd/.libs"
-CUDD_INCLUDE="$CUDD_DIR/cudd"
-
-EXEC_NAME="solution_gen"
-CXX_FLAGS="-std=c++17 -O2 -Wall"
-INCLUDE_FLAGS="-I$INCLUDE_DIR -I$SRC_DIR -I$CUDD_INCLUDE"
-LINK_FLAGS="-L$CUDD_LIB -lcudd -lm -lquadmath"
-
-# 检查 CUDD 库是否存在
-if [ ! -f "$CUDD_LIB/libcudd.a" ] && [ ! -f "$CUDD_LIB/libcudd.so" ]; then
-    echo "❌ 错误: 未找到已编译的 CUDD 库，请先执行："
-    echo "   cd $CUDD_DIR && ./configure && make && cd .."
-    exit 1
-fi
-
-# 编译 BDD 求解器
-echo "编译 solution_gen.cpp..."
-g++ $CXX_FLAGS $INCLUDE_FLAGS "$SRC_DIR/solution_gen.cpp" -o "$run_dir/$EXEC_NAME" $LINK_FLAGS
-
-if [ $? -ne 0 ]; then
-    echo "❌ 编译失败: 无法生成 $EXEC_NAME"
-    exit 1
-fi
-echo "✔ 编译成功: $run_dir/$EXEC_NAME"
+echo "===== Step 3: 运行 BDD 求解器 ====="
+# 复制solution_gen到run_dir（可选，如果希望保留在运行目录中）
+cp "_run/solution_gen" "$run_dir/solution_gen"
 
 # 自动运行解生成器
 AAG_FILE="$run_dir/verilog2aag.aag"
 OUTPUT="$run_dir/result.json"       # 固定输出到 run_dir/result.json
 
-echo "运行 $EXEC_NAME 生成解..."
-echo "命令: $run_dir/$EXEC_NAME $AAG_FILE $seed $solution_num $OUTPUT"
+echo "运行 solution_gen 生成解..."
+echo "命令: _run/solution_gen $AAG_FILE $seed $solution_num $OUTPUT"
 
 # 记录开始时间
 start_time=$(date +%s)
 
 # 运行求解器，并将输出记录到日志文件
-"$run_dir/$EXEC_NAME" "$AAG_FILE" "$seed" "$solution_num" "$OUTPUT" > "$run_dir/solver.log" 2>&1
+"_run/solution_gen" "$AAG_FILE" "$seed" "$solution_num" "$OUTPUT" > "$run_dir/solver.log" 2>&1
 
 if [ $? -ne 0 ]; then
     echo "❌ 解生成失败，请查看日志: $run_dir/solver.log"
