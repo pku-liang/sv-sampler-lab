@@ -60,13 +60,16 @@ class BDD_Solver {
         int random_seed;
         int solution_num;
 
-        DdManager *manager;
+        vector<DdManager> *managers;
         DdNode *out_node;
         vector<DdNode*> nodes; // map from AAG index to BDD node
 
         // map from BDD index to its name
         // name format: var_x[y] -> so record int x and y is ok
         vector<pair<int, int>> idx_to_name;
+        vector<int> nodes_labels;
+        vector<int> parent;
+        int label_cnt;
 
         // aag config
         int max_idx, input_num, latch_num, output_num, and_num, ori_input_num;
@@ -88,11 +91,7 @@ class BDD_Solver {
             
             rng = std::mt19937(random_seed);
             
-            manager = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
-            if (!manager) {
-                cerr << "Error: Failed to initialize CUDD manager" << endl;
-                throw runtime_error("CUDD initialization failed");
-            }
+            
 
             
             max_idx = 0;
@@ -115,6 +114,99 @@ class BDD_Solver {
                 manager = nullptr;
             }
         }
+        
+        int find(int x) {
+            if (parent[x] != x)
+                parent[x] = find(parent[x]); 
+            return parent[x];
+        }
+
+        void merge(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+            if (rootX == rootY) return; 
+
+            
+            if (size[rootX] < size[rootY]) {
+                parent[rootX] = rootY;
+                size[rootY] += size[rootX];
+            } else {
+                parent[rootY] = rootX;
+                size[rootX] += size[rootY];
+            }
+    }
+
+        int check_relativity(){
+            ifstream aag_file(input_file);
+            if (!aag_file.is_open()) {
+                cerr << "Error: Failed to open AAG file" << endl;
+                return -1;
+            }
+
+            string line;
+            aag_file >> line;
+            if (line != "aag") {
+                cerr << "Error: Invalid AAG file format" << endl;
+                return -1;
+            }
+
+            aag_file >> max_idx >> input_num >> latch_num >> output_num >> and_num;
+            
+            
+            parent.resize(max_idx, 0);
+            vector<int> exist;
+            exist.resize(max_idx, 0);
+            for(int i = 0 ; i < input_num ; i++){
+                int idx;
+                aag_file >> idx;
+                parent[idx] = idx;
+                exist[idx] = 1;
+            }
+            int output_idx;
+            aag_file >> output_idx;
+            nodes_labels.assign(max_idx ,0);
+
+            label_cnt = 0;
+            for(int i = 0 ; i < and_num ; i++){
+                int out, in1, in2;
+                aag_file >> out >> in1 >> in2;
+                
+                exist[out] = 1;
+                exist[in1] = 1;
+                exist[in2] = 1;
+                if(parent[in1] != parent[in2]){
+                    merge(in1, in2);
+                }
+                merge(out, in1);
+            }
+            
+            if(int i = 2; i < input_num * 2 + 1; i++){
+                if(exist[i] == 1){
+                    if(i <= input_num * 2){
+                        if(parent[i] == i){
+                            nodes_labels[i] = label_cnt;
+                            label_cnt++;
+                        } 
+                    }
+                }
+            }
+
+            if(int i = 2; i <= max_idx ; i++){
+                if(exist[i] == 1){
+                    nodes_labels[i] = nodes_labels[parent[i]];
+                }
+            }
+
+            managers.resize(label_cnt);
+            for(int i = 0; i < label_cnt; i++){
+                managers[i] = Cudd_Init(0, 0, CUDD_UNIQUE_SLOTS, CUDD_CACHE_SLOTS, 0);
+                if (!managers[i]) {
+                    cerr << "Error: Failed to initialize CUDD manager" << endl;
+                    throw runtime_error("CUDD initialization failed");
+                }
+            }
+            
+        }
 
         int aag_to_BDD(){
             ifstream aag_file(input_file);
@@ -133,7 +225,9 @@ class BDD_Solver {
             aag_file >> max_idx >> input_num >> latch_num >> output_num >> and_num;
             
             if(input_num > 100){
-                Cudd_AutodynEnable(manager, CUDD_REORDER_SIFT);
+                for(int i = 0; i < label_cnt; i++){
+                    Cudd_AutodynEnable(managers[i], CUDD_REORDER_SIFT);
+                }
             }
             
             // initialize 
@@ -144,7 +238,7 @@ class BDD_Solver {
             for(int i = 0 ; i < input_num ; i++){
                 int idx;
                 aag_file >> idx;
-                DdNode* node = Cudd_bddIthVar(manager, i);
+                DdNode* node = Cudd_bddIthVar(managers[nodes_labels[idx]], i);
                 Cudd_Ref(node);
                 nodes[idx / 2 - 1] = node;// aag input first index is 2
 
@@ -153,9 +247,10 @@ class BDD_Solver {
                 dp[Cudd_Not(node)] = {(__float128)1.0, (__float128)0.0}; 
             }
             // for constant node
-            dp[Cudd_ReadOne(manager)] = {(__float128)0.0, (__float128)1.0};
-            dp[Cudd_ReadLogicZero(manager)] = {(__float128)0.0, (__float128)0.0};
-
+            for(int i = 0; i < label_cnt; i++){
+                dp[Cudd_ReadOne(managers[i])] = {(__float128)0.0, (__float128)1.0};
+                dp[Cudd_ReadLogicZero(managers[i])] = {(__float128)0.0, (__float128)0.0};
+            }
             // outputs(only 1 output)
             int output_idx;
             aag_file >> output_idx;
@@ -167,18 +262,18 @@ class BDD_Solver {
                 DdNode *In1, *In2, *Out;
 
                 if(in1 / 2 == 0){// constant
-                     In1 = (in1 % 2 == 0) ? Cudd_ReadOne(manager) : Cudd_ReadLogicZero(manager);
+                     In1 = (in1 % 2 == 0) ? Cudd_ReadOne(managers[nodes_labels[in1]]) : Cudd_ReadLogicZero(managers[nodes_labels[in1]]);
                 } else{
                     In1 = (in1 % 2 == 0) ? nodes[in1 / 2 - 1] : Cudd_Not(nodes[in1 / 2 - 1]);
                 }
 
                 if(in2 / 2 == 0){// constant
-                     In2 = (in2 % 2 == 0) ? Cudd_ReadOne(manager) : Cudd_ReadLogicZero(manager);
+                     In2 = (in2 % 2 == 0) ? Cudd_ReadOne(managers[nodes_labels[in2]]) : Cudd_ReadLogicZero(managers[nodes_labels[in2]]);
                 } else{
                     In2 = (in2 % 2 == 0) ? nodes[in2 / 2 - 1] : Cudd_Not(nodes[in2 / 2 - 1]);
                 }
 
-                Out = Cudd_bddAnd(manager, In1, In2);
+                Out = Cudd_bddAnd(managers[nodes_labels[out]], In1, In2);
                 Cudd_Ref(Out);
                 nodes[out / 2 - 1] = Out;
             }
@@ -230,13 +325,6 @@ class BDD_Solver {
             // done
             aag_file.close();   
 
-            // for debug
-            cout << "AAG to BDD conversion completed" << endl;
-            cout << "BDD infomations:" << endl;
-            Cudd_PrintInfo(manager, stdout); 
-            FILE* dot_file = fopen("./run_dir/bdd.dot", "w");
-            Cudd_DumpDot(manager, 1, &out_node, NULL, NULL, dot_file);
-            fclose(dot_file);
             return 0;
         }
 
@@ -368,7 +456,7 @@ class BDD_Solver {
 
             return success;
         }*/
-        bool dfs_generate_solution(DdNode* node, bool odd, vector<bool>& solution) {
+        bool dfs_generate_solution(DdNode* node, bool odd, vector<bool>& solution, DdManager* manager) {
             if (Cudd_IsConstant(node)) {
                 if ((odd && node == Cudd_ReadOne(manager)) || 
                     (!odd && node != Cudd_ReadOne(manager))) {
@@ -403,10 +491,10 @@ class BDD_Solver {
             bool success = false;
             if (rand_val < prob) {
                 solution[var_index] = true;
-                success = dfs_generate_solution(T, odd, solution);
+                success = dfs_generate_solution(T, odd, solution, manager);
             } else {
                 solution[var_index] = false;
-                success = dfs_generate_solution(E, odd, solution);
+                success = dfs_generate_solution(E, odd, solution, manager);
             }
 
             return success;
@@ -430,7 +518,10 @@ class BDD_Solver {
                 
                 while (attempts < MAX_ATTEMPTS && !success) {
                     attempts++;
-                    success = dfs_generate_solution(out_node, true, solutions[i]);
+                    for(int i = 0; i < label_cnt; i++){
+                        success = dfs_generate_solution(out_node, true, solutions[i],managers[i]);
+                    }
+                    
                 }
                 
                 if (!success) {

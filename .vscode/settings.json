@@ -93,5 +93,6 @@
         "thread": "cpp",
         "variant": "cpp"
     },
-    "cmake.ignoreCMakeListsMissing": true
+    "cmake.ignoreCMakeListsMissing": true,
+    "C_Cpp.errorSquiggles": "disabled"
 }
