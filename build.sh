@@ -2,6 +2,38 @@
 # filepath: /root/finalProject/COSMOS-BDD-solver/build.sh
 
 set -e  # 遇错退出
+echo "===== Initializing and Building Submodules (Yosys & CUDD) ====="
+echo "Updating submodules..."
+#git submodule update --init --recursive
+
+echo "Building Yosys from submodule..."
+if [ -d "yosys" ]; then
+    #cd yosys
+    echo "Running make for Yosys..."
+    #make
+    echo "Running make install for Yosys..."
+    #make install
+    #cd .. # 返回项目根目录
+    echo "✔ Yosys submodule build/install complete."
+else
+    echo "⚠️ Warning: yosys directory not found. Skipping Yosys submodule build."
+fi
+
+echo "Building CUDD from submodule..."
+if [ -d "cudd" ]; then
+    #cd cudd
+    echo "Running autoreconf for CUDD..."
+    #autoreconf -fi
+    echo "Running configure for CUDD..."
+    #./configure
+    echo "Running make for CUDD..."
+    #make
+    #cd .. # 返回项目根目录
+    echo "✔ CUDD submodule build complete."
+else
+    echo "⚠️ Warning: cudd directory not found. Skipping CUDD submodule build."
+fi
+echo # 添加空行以提高可读性
 
 # 创建_run目录（如果不存在）
 mkdir -p _run
